@@ -38,7 +38,7 @@ def func():
 
 
 ##1. 开户申请表
-path = r'c:\users\chen.huaiyu\Desktop\Input\c.s.conf'
+path = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
 mainKH(func(), 1, path)
 
 ##2. '邮件据主题抓取：io system'

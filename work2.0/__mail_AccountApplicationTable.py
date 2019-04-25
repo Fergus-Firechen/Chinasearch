@@ -26,7 +26,7 @@ columns = ['日期', '合同原件是否已回', '是否赠送服务费', '是�
            '届满日期', '联系人', '电话', '客户', 'flag']
 
 # 日志
-PATH = r'C:\Users\chen.huaiyu\Desktop\Input\logging.conf'
+PATH = r'C:\Users\chen.huaiyu\Chinasearch\logging.conf'
 logging.config.fileConfig(PATH)
 logger = logging.getLogger('chinaSearch')
 
@@ -302,8 +302,8 @@ def mainKH(n, sec, path):
 if __name__ == '__main__':
     
     # 账号密码 配置文件地址
-    path = r'c:\\users\\chen.huaiyu\\Desktop\\Input\\c.s.conf'
-    mainKH(10, 5, path)
+    path = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
+    mainKH(6, 5, path)
         
     pass
 
