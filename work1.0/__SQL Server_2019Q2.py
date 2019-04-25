@@ -13,7 +13,7 @@ from xlwings import constants
 
 star = time.clock()
 
-DATE = '20190415'  # 改1
+DATE = '20190424'  # 改1
 target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE
 server_name = 'SZ-CS-0038LT\SQLEXPRESS'
 db_name = 'CSA_2019Q2'

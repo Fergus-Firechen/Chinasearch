@@ -13,8 +13,8 @@ import os
 import shutil
 import xlwings as xw
 
-date_file = '20190410'
-DATE = '20190415'  # 改1
+date_file = '20190415'
+DATE = '20190424'  # 改1
 
 # eg.规范命命：ave.workday&weekdayq4(2018 oct_dec)2019.01.02_v3
 # wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2018 Oct_Dec) ' + DATE_ + 'v1.xlsx')
@@ -184,7 +184,7 @@ wb5.save()
 
 # 删除第二行
 input('\a表单检查：')
-for i in [sht42, sht43, sht52, sht53]:
+for i in [sht32, sht33, sht42, sht43, sht52, sht53]:
     i[1,:].api.Delete()
 
 wb3.save()

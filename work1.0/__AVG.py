@@ -21,12 +21,12 @@ today = datetime.datetime.today()
 # 输入
 # 1.N:前1日=1；前2日=0；前3日=-1...依次类推
 # 
-N = 2
+N = 1
 # 修改 AVG.日期
 Yesterday = today-datetime.timedelta(N)
 
 # 直接引用邮件中文件
-wb1 = xw.books('P4P 消费报告2019.4.15.xlsx')
+wb1 = xw.books('P4P 消费报告2019.4.24.xlsx')
 
 sht1 = wb1.sheets['P4P消费']
 sht20 = wb1.sheets['搜索点击消费']
@@ -65,7 +65,8 @@ range40 = sht40[9:row11, column11:column12 + 1]
 
 
 # 繁
-wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ2(2019 Apr_Jun)2019.04.15.xlsx')
+wb2 = xw.Book(
+        r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ2(2019 Apr_Jun)2019.04.24.xlsx')
 
 # 简 wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4- 2018.12.23(simplified)-v1.xlsx')
 # wb2 = xw.books('Ave.workday&weekdayQ4- 2018.12.23(simplified)')
@@ -146,17 +147,17 @@ for i in [sht2, sht3, sht4]:
         if j.value == '北京军朗广告有限公司':  # 标识军朗账户 s列
             rng = j.get_address().replace('S', 'I')
             i[rng].color = (146, 208, 80)
-wb2.save()
+# wb2.save()
 
 # 最近2日列
-co = 'bv'
-lu = 'bs'
+co = 'cd'
+lu = 'ce'
 
 
 '''  均值 '''
 for i in [sht2, sht3, sht4]:
-    i['MD3'].formula = '=average(bk3,bo3:bs3,bv3)'  # 工；繁版；周三；改！
-    i['ME3'].formula = '=average(bm3:bn3,bt3:bu3)'
+    i['MD3'].formula = '=average(bw3:bz3,cc3:ce3)'  # 工；繁版；周三；改！
+    i['ME3'].formula = '=average(bt3:bu3,ca3:cb3)'
     # '''
     i['MD3:ME3'].api.AutoFill(i['MD3:ME' + str(row201)].api, constants.AutoFillType.xlFillCopy)
     print('耗时：{:3f}'.format((time.clock() - start)/60))
