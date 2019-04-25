@@ -292,9 +292,8 @@ def mainKH(n, sec, path):
         server.quit()
     
         '写入 SQL Server, 只写入新增账户  shape[0]+1'
-        if df.shape >= shape:
-            df.loc[shape[0]:df.shape[0], :].to_sql('开户申请表', con=engine, 
-                  if_exists='append', index=False)
+        df.loc[shape[0]:df.shape[0], :].to_sql('开户申请表', con=engine, 
+              if_exists='replace', index=False)
     except KeyboardInterrupt:
         logger.warning('KeyboardInterrupt', exc_info=True)
 
