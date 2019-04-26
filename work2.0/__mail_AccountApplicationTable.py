@@ -26,7 +26,7 @@ columns = ['日期', '合同原件是否已回', '是否赠送服务费', '是�
            '届满日期', '联系人', '电话', '客户', 'flag']
 
 # 日志
-PATH = r'C:\Users\chen.huaiyu\Desktop\Input\logging.conf'
+PATH = r'C:\Users\chen.huaiyu\Chinasearch\logging.conf'
 logging.config.fileConfig(PATH)
 logger = logging.getLogger('chinaSearch')
 
@@ -38,7 +38,6 @@ if engine.execute('select 1'):
 engine.execute("DELETE FROM 开户申请表 WHERE 用户名 = '0.0'")
 df = pd.DataFrame(engine.execute('select * from 开户申请表 order by 日期'
                                      ).fetchall(), columns=columns)
-shape = df.shape
 
 def cost_time(func):
     '耗时跟进'
@@ -225,8 +224,6 @@ def dataCleaning(dic):
     df1 = normal(df1)
     df = df.append(df1, ignore_index=True, sort=False)
     df.drop_duplicates('用户名', keep='last', inplace=True)
-    '标识程序运行日期'
-    df = df.append(dfNull(), ignore_index=True, sort=False)
 
 def normal(df):
     # 格式化
@@ -248,7 +245,9 @@ def dfNull():
 
 @cost_time
 def mainKH(n, sec, path):
-    '据设置抓取时段，完成邮件抓取'
+    '''
+    据设置抓取时段，完成邮件抓取
+    '''
     try:
         logger.info('Tips: catch the frequency %ss', sec)
         if os.path.exists(path):
@@ -257,21 +256,16 @@ def mainKH(n, sec, path):
             conf.read(path)
         else:
             raise FileExistsError('file c.s.conf is not exists')
-    except Exception as e:
-        logger.error(e, exc_info=True)
-    
-    try:
+        # 登陆、遍历邮件、解析
         server = poplib.POP3_SSL(conf.get('mail_baidu', 'receiving server'))
         logger.info(server.set_debuglevel(1))
         logger.info(server.getwelcome().decode('utf-8'))
-    
         server.user(conf.get('mail_baidu', 'email'))
         server.pass_(conf.get('mail_baidu', 'password'))
-    
         Message, Size = server.stat()
         logger.info('Message: %s Size: %s', Message, Size)
         resp, mails, octets = server.list()
-        index = len(mails)
+        index = len(mails)  
         for i in range(index, 0, -1):
             time.sleep(sec)
             try:
@@ -290,20 +284,27 @@ def mainKH(n, sec, path):
             except TimeoutError as e:
                 logger.error('Tips 239: 访问受限，连接超时 %s', e)
         server.quit()
+        '标识程序运行日期'
+        global df
+        df = df.append(dfNull(), ignore_index=True, sort=False)
     
-        '写入 SQL Server, 只写入新增账户  shape[0]+1'
-        df.loc[shape[0]:df.shape[0], :].to_sql('开户申请表', con=engine, 
-              if_exists='replace', index=False)
+        '写入 SQL Server，替换写'
+        # 后续变更为只增加新户
+        df.to_sql('开户申请表', con=engine, if_exists='replace', index=False)
+    except FileExistsError as e:
+        logger.error(e, exc_info=True)
     except KeyboardInterrupt:
         logger.warning('KeyboardInterrupt', exc_info=True)
+    except Exception as e:
+        logger.warning('Warning: %s', e, exc_info=True)
 
 
 
 if __name__ == '__main__':
     
     # 账号密码 配置文件地址
-    path = r'c:\\users\\chen.huaiyu\\Desktop\\Input\\c.s.conf'
-    mainKH(10, 5, path)
+    path = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
+    mainKH(1, 5, path)
         
     pass
 
