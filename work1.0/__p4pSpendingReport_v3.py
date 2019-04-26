@@ -14,7 +14,7 @@ import xlwings as xw
 # import numpy as np
 import datetime, time
 from __MergeExcel import MergeIO
-from __DaytoDayRatio_v2 import nearly5Workdays
+from __DaytoDayRatio_v3 import nearly5Workdays
 from xlwings import constants
 
 
