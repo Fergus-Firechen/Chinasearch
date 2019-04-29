@@ -1,6 +1,6 @@
 # 《数据结构与算法》
 
-## 链表
+## 06 链表
 
 - 经典应用场景：LRU缓存淘汰算法。
 
@@ -13,6 +13,8 @@
   LFU; Least Frequently Used
 
   LRU; Least Recently Used
+
+  注：缓存的存在，是为了弥补内存访问速度过慢与CPU执行速度过快的矛盾。
 
 - vs 数组
 
