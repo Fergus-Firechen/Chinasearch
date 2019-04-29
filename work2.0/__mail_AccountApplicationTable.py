@@ -195,7 +195,8 @@ def getForm(infobox):
 
 @cost_time
 def dataCleaning(dic):
-    '''对邮件抓取到的数据进行清洗'''
+    '''对邮件抓取到的数据进行清洗
+    '''
     df1 = pd.DataFrame(dic)
     # '军朗 填充'
     try:
@@ -228,6 +229,7 @@ def dataCleaning(dic):
 def normal(df):
     '''默认格式
     '''
+    logger.info('恢复默认格式')
     df = df.applymap(lambda x: str(x))
     df['日期'] = pd.to_datetime(df['日期'])
     df.sort_values(by='日期', ascending=True, inplace=True)
@@ -237,6 +239,7 @@ def dfNull(dat=None):
     '''构造空行；录入程序运行日日期;提高运行效率
        - 读入前删除标识行
     '''
+    logger.info('空行构造')
     import numpy as np
     dff = pd.DataFrame(np.zeros((1,len(columns))), columns=columns)
     if dat == None:
@@ -250,6 +253,7 @@ def dfNull(dat=None):
 def restore(dat=None):
     '''异常恢复/增加标识行'''
     dfNull(dat).to_sql('开户申请表', con=engine, if_exists='append', index=False)
+    logger.info('异常恢复/增加标识行')
 
 @cost_time
 def mainKH(date_0, sec, path):
@@ -321,7 +325,8 @@ if __name__ == '__main__':
     path = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
     
     #'据数据库中最近日期判定抓取日期'
-    date_0 = engine.execute('''select top 1 日期 from 开户申请表'''
+    date_0 = engine.execute('''select top 1 日期 from 开户申请表 
+                            ORDER BY 日期 DESC'''
                               ).fetchone()[0]
     mainKH(date_0, 1, path)
         

@@ -34,4 +34,4 @@ date_0 = engine.execute('''select top 1 日期 from 开户申请表
 
 ##1. 开户申请表
 path = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
-mainKH(date_0, 1, path)
+mainKH(date_0, 2, path)
