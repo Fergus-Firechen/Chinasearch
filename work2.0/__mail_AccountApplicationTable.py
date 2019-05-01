@@ -222,17 +222,35 @@ def dataCleaning(dic):
     for i in df1.columns[1:]:
         df1[i] = df1[i].apply(lambda x: str(x))
     # '合并 去重'
-    df1 = normal(df1)
+    df1 = normalFormat(df1)
     df = df.append(df1, ignore_index=True, sort=False)
     df.drop_duplicates('用户名', keep='last', inplace=True)
 
-def normal(df):
+def normalFormat(df):
     '''默认格式
     '''
     logger.info('恢复默认格式')
     df = df.applymap(lambda x: str(x))
     df['日期'] = pd.to_datetime(df['日期'])
     df.sort_values(by='日期', ascending=True, inplace=True)
+    return df
+
+def standardPersonalInformation(col, df):
+    '''规范人员信息:销售、AM
+    '''
+    # 构建查询表
+    lis = [i[3] for i in engine.execute(
+          "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='人员信息表'"
+            ).fetchall()]
+    dff = pd.DataFrame(engine.execute('SELECT * FROM 人员信息表').fetchall(), 
+                       columns=lis)
+    dff = dff.dropna(subset=['常用']).loc[:, ['姓名', '常用']].set_index('常用',
+                    drop=True)
+    # str.title()
+    df[col] = df[col].str.title()
+    # 遍历查询修改
+    for i in dff.index.tolist():
+        df.loc[df[col] == i, col] = dff.loc[i, :][0]
     return df
 
 def dfNull(dat=None):
@@ -247,7 +265,7 @@ def dfNull(dat=None):
     else:
         dff['日期'] = dat
     # 格式化
-    dff = normal(dff)
+    dff = normalFormat(dff)
     return dff
 
 def restore(dat=None):
@@ -328,7 +346,7 @@ if __name__ == '__main__':
     date_0 = engine.execute('''select top 1 日期 from 开户申请表 
                             ORDER BY 日期 DESC'''
                               ).fetchone()[0]
-    mainKH(date_0, 1, path)
+    #mainKH(date_0, 1, path)
         
     pass
 
