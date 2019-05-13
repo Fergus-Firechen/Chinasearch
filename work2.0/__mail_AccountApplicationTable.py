@@ -18,28 +18,6 @@ import pandas as pd
 import logging.config
 
 
-columns = ['日期', '合同原件是否已回', '是否赠送服务费', '是否开票', 
-           '推广性质', '销售', '客服', '用户名', '端口', '行业',
-           '渠道', '广告主总部', '资质归属地', '预估月消费', 
-           'Region', '账期/预付', '服务费', '年费', '服务费币种', 
-           '网站名称', '广告主名称', '广告主_简体', 'URL', '登记证编号', '生效日',
-           '届满日期', '联系人', '电话', '客户', 'flag']
-
-# 日志
-PATH = r'C:\Users\chen.huaiyu\Chinasearch\logging.conf'
-logging.config.fileConfig(PATH)
-logger = logging.getLogger('chinaSearch')
-
-# 连接SQL Server
-engine = create_engine(r'mssql+pyodbc://SQL Server')
-if engine.execute('select 1'):
-    logger.info('SQL Server 连接正常')
-    
-# 删除DB中标识项
-engine.execute("DELETE FROM 开户申请表 WHERE 用户名 = '0.0'")
-df = pd.DataFrame(engine.execute('select * from 开户申请表 order by 日期'
-                                     ).fetchall(), columns=columns)
-
 def cost_time(func):
     '''耗时跟进'''
     @functools.wraps(func)
@@ -62,6 +40,7 @@ def decode_str(s):
     # decode_header返回list,像Cc,Bcc这样的字段可包含多个邮件地址，有多个元素
     # --此处只取了一个元素
     '''
+    logger.info('解码邮件主题')
     value, charset = decode_header(s)[0]  # 解码，不转换
     if charset:
         try:
@@ -78,6 +57,7 @@ def guess_charset(msg):
     # 2)如果消息是多部分，则列表将包含有效负载中每个子部分的一个元素
     # -- 否则，它将是长度为1的列表
     '''
+    logger.info('检测内容编码')
     charset = msg.get_charset()
     if charset is None:
         content_type = msg.get('Content-Type', '').lower()
@@ -95,15 +75,13 @@ def print_info(msg, indent=0):
     # 要递归打印出Message对象
     # indent用于缩进显示
     '''
+    logger.info('邮件解析')
     if indent == 0:
         for header in ['From', 'To', 'Subject', 'Date']:
             value = msg.get(header, '')
             if value:
                 if header == 'Subject':
                     value = decode_str(value)
-                    # '申明全局变量，为后续判定做准备'
-                    global subject
-                    subject = value
                 elif header == 'Date':
                     value = msg.get(header, '')
                 else:
@@ -139,6 +117,7 @@ def print_info(msg, indent=0):
 
 def getForm(infobox):
     '''截取邮件中表格部分'''
+    logger.info('从邮件中截取表格部分')
     # (?isu)意思是，搜索时包含回车、换行、汉字、空格
     p1 = re.compile(r'(?isu)<tr[^>]*>(.*?)</tr>')
     p2 = re.compile(r'(?isu)<td[^>]*>(.*?)</td>')
@@ -216,42 +195,51 @@ def dataCleaning(dic):
     # '空值 填充'
     df1.fillna('-', inplace=True)
     # '邮件日期 补充'
-    global df
     df1['日期'] = date
     df1['flag'] = 'IO'
     for i in df1.columns[1:]:
         df1[i] = df1[i].apply(lambda x: str(x))
-    # '合并 去重'
+    # 默认格式
     df1 = normalFormat(df1)
+    # 统一销售 & 客服
+    df1 = regulatorInformation(df1)
+    df1 = regulatorInformation(df1, '客服')
+    # '合并 去重'
+    global df
     df = df.append(df1, ignore_index=True, sort=False)
     df.drop_duplicates('用户名', keep='last', inplace=True)
 
 def normalFormat(df):
-    '''默认格式
+    '''格式化：日期+str
     '''
-    logger.info('恢复默认格式')
+    logger.info('格式化:日期+str')
     df = df.applymap(lambda x: str(x))
     df['日期'] = pd.to_datetime(df['日期'])
     df.sort_values(by='日期', ascending=True, inplace=True)
     return df
 
-def standardPersonalInformation(col, df):
-    '''规范人员信息:销售、AM
+def regulatorInformation(df, col='销售'):
+    '''人员姓名统一:销售、客服
     '''
-    # 构建查询表
-    lis = [i[3] for i in engine.execute(
-          "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='人员信息表'"
-            ).fetchall()]
-    dff = pd.DataFrame(engine.execute('SELECT * FROM 人员信息表').fetchall(), 
-                       columns=lis)
-    dff = dff.dropna(subset=['常用']).loc[:, ['姓名', '常用']].set_index('常用',
-                    drop=True)
-    # str.title()
-    df[col] = df[col].str.title()
-    # 遍历查询修改
-    for i in dff.index.tolist():
-        df.loc[df[col] == i, col] = dff.loc[i, :][0]
-    return df
+    logger.info('销售客服人员姓名统一')
+    if col in ['销售', '客服']:
+        # 构建查询表
+        dff = pd.DataFrame(engine.execute(
+                'select a.name, b.姓名 from 姓名统一表 a inner join 人员信息表 b on a.person_id=b.Id'
+                ).fetchall(), columns=['name', 'person'])
+        dff = dff.set_index('name', drop=True)
+        # str.title()
+        df[col] = df[col].str.title()
+        # 遍历查询修改
+        for i in dff.index.tolist():
+            df.loc[df[col] == i, col] = dff.loc[i, :][0]
+        return df
+    else:
+        try:
+            raise ValueError('%s 不符合要求，只能是销售&客服' % col)
+        except ValueError as e:
+            restore(date_0)
+            logger.warning('warning: %s' % e)
 
 def dfNull(dat=None):
     '''构造空行；录入程序运行日日期;提高运行效率
@@ -270,13 +258,14 @@ def dfNull(dat=None):
 
 def restore(dat=None):
     '''异常恢复/增加标识行'''
+    logger.info('Start:异常恢复/增加标识行')
     dfNull(dat).to_sql('开户申请表', con=engine, if_exists='append', index=False)
-    logger.info('异常恢复/增加标识行')
+    logger.info('End:异常恢复/增加标识行')
 
 @cost_time
 def mainKH(date_0, sec, path):
     '''
-    据设置抓取时段，完成邮件抓取
+    从最近一次抓取时间开始，完成邮件抓取
     '''
     try:
         logger.info('Tips: catch the frequency %ss', sec)
@@ -321,7 +310,7 @@ def mainKH(date_0, sec, path):
         # '写入 SQL Server，替换写'
         # 后续变更为只增加新户
         #
-        df.to_sql('开户申请表', con=engine, if_exists='replace', index=False)
+        df.to_sql('开户申请表', con=engine, if_exists='replace', index=True)
         restore()
     except FileExistsError as e:
         # 复位
@@ -336,17 +325,53 @@ def mainKH(date_0, sec, path):
         restore(date_0)
         logger.warning('Warning: %s', e, exc_info=True)
 
+def data(args):
+    sql = "select * from %s" % args
+    data = engine.execute(sql).fetchall()
+    return data
 
-if __name__ == '__main__':
-    
+def col(args, n=None):
+    sql = "select * from information_schema.columns where table_name='%s'" % args
+    col = [i[3] for i in engine.execute(sql).fetchall()]
+    if n == 1:
+        col.remove('Id')
+    return col
+
+def dff(args):
+    df = pd.DataFrame(data(args), columns=col(args))
+    if 'Id' in col(args):
+        df.drop(columns=['Id'], inplace=True)
+    return df
+
+try:
     # 账号密码 配置文件地址
     path = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
     
-    #'据数据库中最近日期判定抓取日期'
-    date_0 = engine.execute('''select top 1 日期 from 开户申请表 
-                            ORDER BY 日期 DESC'''
-                              ).fetchone()[0]
-    #mainKH(date_0, 1, path)
+    # 日志
+    PATH = r'C:\Users\chen.huaiyu\Chinasearch\logging.conf'
+    logging.config.fileConfig(PATH)
+    logger = logging.getLogger('chinaSearch')
+    
+    # 连接SQL Server
+    engine = create_engine(r'mssql+pyodbc://SQL Server')
+    if engine.execute('select 1'):
+        logger.info('SQL Server 连接正常')
         
-    pass
+        columns = col('开户申请表', 1)
+        #'据数据库中最近日期判定抓取日期'
+        date_0 = engine.execute('''select top 1 日期 from 开户申请表 
+                                ORDER BY 日期 DESC'''
+                                  ).fetchone()[0]
+        
+        # 删除DB中标识项
+        engine.execute("DELETE FROM 开户申请表 WHERE 用户名 = '0.0'")
+        df = dff('开户申请表')
+    
+        # 主程序
+        mainKH(date_0, 5, path)
+    else:
+        logger.warning('SQL Server 连接失败')
+except Exception as e:
+    logger.warning(e)
+    restore(date_0)
 
