@@ -204,6 +204,8 @@ def dataCleaning(dic):
     # 统一销售 & 客服
     df1 = regulatorInformation(df1)
     df1 = regulatorInformation(df1, '客服')
+    df1 = regulatorInformation(df1, '渠道')
+    df1 = regulatorInformation(df1, '端口')
     # '合并 去重'
     global df
     df = df.append(df1, ignore_index=True, sort=False)
@@ -219,24 +221,45 @@ def normalFormat(df):
     return df
 
 def regulatorInformation(df, col='销售'):
-    '''人员姓名统一:销售、客服
+    '''人员姓名统一:销售、客服、渠道名
     '''
     logger.info('销售客服人员姓名统一')
     if col in ['销售', '客服']:
         # 构建查询表
-        dff = pd.DataFrame(engine.execute(
-                'select a.name, b.姓名 from 姓名统一表 a inner join 人员信息表 b on a.person_id=b.Id'
+        df1 = pd.DataFrame(engine.execute(
+                'select a.name, b.姓名 from 姓名统一表 a inner join personInfo b on a.person_id=b.Id'
                 ).fetchall(), columns=['name', 'person'])
-        dff = dff.set_index('name', drop=True)
+        df1 = df1.set_index('name', drop=True)
         # str.title()
         df[col] = df[col].str.title()
         # 遍历查询修改
-        for i in dff.index.tolist():
-            df.loc[df[col] == i, col] = dff.loc[i, :][0]
+        for i in df1.index.tolist():
+            df.loc[df[col] == i, col] = df1.loc[i, :][0]
+        return df
+    if col == '渠道':
+        df.loc[(df['渠道']  == '代理')|(df['渠道'] == '代表'), '渠道'] = '代理商'
+        df.loc[df['渠道'] == '直客', '渠道'] = '直接客户'
+        return df
+    if col == '端口':
+        df_p = dff('channel')
+        df_p.set_index(col, inplace=True)
+        for i in set(df[col]):
+            if i not in df_p.index:
+                try:
+                    raise KeyError ("端口表中缺失，请补充新端口: %s" % i)
+                except KeyError as e:
+                    logger.warning(e)
+                    continue
+            elif pd.isna(df_p.loc[i, '客户']):
+                logger.info('跳过 %s;因：%s' %(i, df_p.loc[i, '客户']))
+                continue
+            else:
+                df.loc[df[col] == i, '客户'] = df_p.loc[i, '客户']
+                logger.info('填充端口：%s' % df_p.loc[i, '客户'])
         return df
     else:
         try:
-            raise ValueError('%s 不符合要求，只能是销售&客服' % col)
+            raise ValueError('%s 不符合要求，只能是销售&客服&渠道' % col)
         except ValueError as e:
             restore(date_0)
             logger.warning('warning: %s' % e)
@@ -310,7 +333,10 @@ def mainKH(date_0, sec, path):
         # '写入 SQL Server，替换写'
         # 后续变更为只增加新户
         #
-        df.to_sql('开户申请表', con=engine, if_exists='replace', index=True)
+        global df
+        df['Id'] = df.index.tolist()
+        df = df.reindex(columns=col('开户申请表'))
+        df.to_sql('开户申请表', con=engine, if_exists='replace', index=False)
         restore()
     except FileExistsError as e:
         # 复位
@@ -326,22 +352,26 @@ def mainKH(date_0, sec, path):
         logger.warning('Warning: %s', e, exc_info=True)
 
 def data(args):
+    '获取DB数据'
     sql = "select * from %s" % args
     data = engine.execute(sql).fetchall()
     return data
 
-def col(args, n=None):
+def col(args, del_col=None):
+    '获取表单表头'
     sql = "select * from information_schema.columns where table_name='%s'" % args
     col = [i[3] for i in engine.execute(sql).fetchall()]
-    if n == 1:
+    if del_col == 1:
         col.remove('Id')
     return col
 
 def dff(args):
+    'DB数据转换为DATAFRAME格式'
     df = pd.DataFrame(data(args), columns=col(args))
     if 'Id' in col(args):
         df.drop(columns=['Id'], inplace=True)
     return df
+
 
 try:
     # 账号密码 配置文件地址
@@ -355,9 +385,9 @@ try:
     # 连接SQL Server
     engine = create_engine(r'mssql+pyodbc://SQL Server')
     if engine.execute('select 1'):
-        logger.info('SQL Server 连接正常')
+        logger.info('\nSQL Server 连接正常')
         
-        columns = col('开户申请表', 1)
+        columns = col('开户申请表', del_col=1)
         #'据数据库中最近日期判定抓取日期'
         date_0 = engine.execute('''select top 1 日期 from 开户申请表 
                                 ORDER BY 日期 DESC'''

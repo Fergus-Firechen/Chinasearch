@@ -13,7 +13,7 @@ from xlwings import constants
 
 star = time.clock()
 
-DATE = '20190424'  # 改1
+DATE = '20190514'  # 改1
 target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE
 server_name = 'SZ-CS-0038LT\SQLEXPRESS'
 db_name = 'CSA_2019Q2'
@@ -600,11 +600,11 @@ sht['A3'].value = list(map(list, item))
 # NP
 cursor.execute(sql.replace('P4P_20190402', 'NP_'+DATE))
 item = cursor.fetchall()
-sht['A17'].value = list(map(list, item))
+sht['A19'].value = list(map(list, item))
 # Infeeds
 cursor.execute(sql.replace('P4P_20190402', 'Infeeds_'+DATE))
 item = cursor.fetchall()
-sht['A31'].value = list(map(list, item))
+sht['A35'].value = list(map(list, item))
 
 wb.app.calculation = 'automatic'
 wb.save()
@@ -720,7 +720,7 @@ sum([Jun Eligible Spending]) as Jun_Eligible_Spending, sum([Apr Eligible Spendin
 sum([May Eligible Spending Forecast]) as May_Eligible_Spending_Forecast, sum([Jun Eligible Spending Forecast]) as Jun_Eligible_Spending_Forecast, 
 sum([Q2 Eligible Spending Forecast]) as Q2_Eligible_Spending_Forecast, sum([Eligible Spending(QTD)]) as Q2_Eligible_Spending_QTD
 from P4P_20190402 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
-where 端口 not like '%wrong%' and a.NB not like '2017&2018EB' and b.Sales not like '%Eric%'
+where 端口 not like '%wrong%' and a.NB not like '2017&2018EB'
 group by a.NB, a.销售
 order by a.NB, a.销售
     '''
@@ -731,11 +731,11 @@ sht['A3'].value = list(map(list, item))
 # NP
 cursor.execute(sql.replace('P4P_20190402', 'NP_'+DATE))
 item = cursor.fetchall()
-sht['A14'].value = list(map(list, item))
+sht['A17'].value = list(map(list, item))
 # Infeeds
 cursor.execute(sql.replace('P4P_20190402', 'Infeeds_'+DATE))
 item = cursor.fetchall()
-sht['A25'].value = list(map(list, item))
+sht['A31'].value = list(map(list, item))
 
 wb.app.calculation = 'automatic'
 wb.save()
