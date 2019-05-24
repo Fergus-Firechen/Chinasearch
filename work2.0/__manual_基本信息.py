@@ -9,37 +9,24 @@ Created on Tue Mar 19 20:10:33 2019
 @author: chen.huaiyu
 """
 
-import time, datetime, functools, os
+import time, functools, os
 import pandas as pd
 #import xlwings as xw
 from sqlalchemy import create_engine
+from datetime import datetime, timedelta
 
 # 连接 DB
 engine = create_engine(r'mssql+pyodbc://@SQL Server')
 print(engine.execute('select 1'), '\nSQL Server 连接正常')
 
-# 制作日期
-yes = datetime.date.today()-datetime.timedelta(1)  # 昨日
-print(yes)
-
-# 文件地址
-path1 = [r'H:\SZ_数据\基本信息拆解.xlsx',  # 基本信息地址
-        r'C:\Users\chen.huaiyu\Downloads\消费报告 %s_%s.csv' % (
-                yes.strftime('%Y%m%d'), yes.strftime('%Y%m%d')),  # 改
-        r'H:\SZ_数据\Input\P4P 消费报告' + str(yes.year) + 
-            '.' + str(yes.month) + '...xlsx']  # 写入报表
-
-# =============================================================================
-# path1 = [r'C:\Users\chen.huaiyu\Desktop\基本信息拆解.xlsx',  # 基本信息地址
-#         r'C:\Users\chen.huaiyu\Downloads\消费报告 20190328_20190328.csv',
-#         r'C:\Users\chen.huaiyu\Desktop\P4P 消费报告2019.3.19.xlsx']  # 写入报表
-# =============================================================================
-
-# =============================================================================
-# sht_all = ['基本信息', 'P4P消费', '搜索点击消费', '新产品消费（除原生广告）', 
-#            '原生广告', '无线搜索点击消费', '开户申请表', '人员信息表', 
-#            '端口', '广告主', '字段']
-# =============================================================================
+def path_date_str(n=1):
+    '消费文件地址构造，默认昨日'
+    yes_str = datetime.strftime(datetime.today() - timedelta(n), "%Y%m%d")
+    path = os.chdir(r"c:\Users\chen.huaiyu\downloads")
+    for i in filter(lambda x: yes_str in x, os.listdir()):
+        os.rename(i, i.replace('~', '_' ))
+    path = os.path.join(os.getcwd(), '消费报告 %s_%s.csv' % (yes_str, yes_str))
+    return path
 
 def cost_time(func):
     '耗时'
@@ -79,6 +66,10 @@ def initBasicInfo(path):
     return df
 
 def initBasicInfo2(df):
+    # 复位ID
+    df['Id'] = df_b.index.tolist()
+    df = df.reindex(columns=col('basicInfo'))
+    # 复位信誉值 ==>str
     df['信誉成长值'] = df['信誉成长值'].astype(str)
     df = dff(df)
     return df
@@ -104,6 +95,8 @@ def read_file():
     '读取数据'
     # 临时全局变量
     global df_b, df_i, df_kh, df_em, df_p
+    # 文件地址
+    path = path_date_str()
     # accountApplication
     df_kh = df('开户申请表')
     # basicInfo
@@ -115,11 +108,10 @@ def read_file():
     # 字段
     df_normal = df('统一字段表')
     # 数据获取
-    if os.path.exists(path1[1]):
-        df_i = pd.read_csv(path1[1], encoding='gbk', engine='python')
+    if os.path.exists(path):
+        df_i = pd.read_csv(path, encoding='gbk', engine='python')
     else:
-        print('Tips: path1，路径文件不存在；')
-        return
+        raise 'Tips: path，路径文件不存在；'
     
     'icrm 转换'
     df_normal.set_index('第三方', drop=True, inplace=True)
@@ -300,8 +292,6 @@ def new_b():
             df_b.loc[df_b['用户名'].isin(df_date['用户名'].tolist()), 
                      date] = df_date[date].apply(lambda x:str(x)).values
         # 结束,更新DB
-        df_b['Id'] = df_b.index.tolist()
-        df_b = df_b.reindex(columns=col('basicInfo'))
         initBasicInfo2(df_b).to_sql('basicInfo1', con=engine, if_exists='replace', index=False)
     else:
         pass
@@ -310,9 +300,9 @@ def after_a_year(df, col1, col2):
     '+ 1年'
     ## 普通润平年处理;忽略世纪润年；
     try:
-        i = datetime.timedelta(366)
-        j = datetime.timedelta(365)
-        if yes.year % 4 == 0:
+        i = timedelta(366)
+        j = timedelta(365)
+        if datetime.today().year % 4 == 0:
             df[col1] = df[col2].apply(lambda x:x+i)
         else:
             df[col1] = df[col2].apply(lambda x:x+j)
@@ -322,7 +312,6 @@ def after_a_year(df, col1, col2):
 if __name__ == '__main__':
     
     #'保留测试账户，进行测试'  --已
-    
     run()  # 测试
     # initBasicInfo()  # 初始化；从桌面读入基本信息，整理
     read_file()

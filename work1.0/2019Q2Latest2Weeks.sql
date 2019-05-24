@@ -93,8 +93,9 @@ from P4P_temp1
 group by 广告主, 客户, AM, channel
 order by [0501_0514_Total_Spending] desc
 
+
 --TOP50广告主消费
-select top 80 rank() over (order by sum([0501_0507_Total_Spending])+sum([0508_0514_Total_Spending]) desc) as 序号, 广告主, 客户, AM, 
+select top 50 rank() over (order by sum([0501_0507_Total_Spending])+sum([0508_0514_Total_Spending]) desc) as 序号, 广告主, 客户, AM, 
 sum(Q2QTD_Total_Spending) as [Q2QTD_Total_Spending], sum([0501_0507_Total_Spending]) as [0501_0507_Total_Spending] , 
 sum([0508_0514_Total_Spending]) as [0508_0514_Total_Spending], sum([0501_0507_P4P_Spending]) as [0501_0507_P4P_Spending], 
 sum([0508_0514_P4P_Spending]) as [0508_0514_P4P_Spending] , sum([0501_0507_NewProduct_Spending]) as [0501_0507_NewProduct_Spending], 

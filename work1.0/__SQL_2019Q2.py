@@ -13,8 +13,8 @@ import os
 import shutil
 import xlwings as xw
 
-date_file = '20190508'
-DATE = '20190514'  # 改1
+date_file = '20190514'
+DATE = '20190522'  # 改1
 
 # eg.规范命命：ave.workday&weekdayq4(2018 oct_dec)2019.01.02_v3
 # wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2018 Oct_Dec) ' + DATE_ + 'v1.xlsx')
@@ -178,9 +178,11 @@ l2['B'+str(rows_2//4+1)].value = i[j5+str(rows_2//4+1)+':'+j6+str(rows_2//2)].va
 l2['B'+str(rows_2//2+1)].value = i[j5+str(rows_2//2+1)+':'+j6+str(3*rows_2//4)].value
 l2['B'+str(3*rows_2//4+1)].value = i[j5+str(3*rows_2//4+1)+':'+j6+str(rows_2)].value
   
-wb3.save()
-wb4.save()
-wb5.save()
+# =============================================================================
+# wb3.save()
+# wb4.save()
+# wb5.save()
+# =============================================================================
 
 # 删除第二行
 input('\a表单检查：')
