@@ -5,7 +5,7 @@ Created on Tue Mar 19 20:10:33 2019
 # 新消户不存于端口表中
 # DB取代文件“数据拆解表”
 # df_kh 字段名统一？
-
+# 20190528 增首次消费日
 @author: chen.huaiyu
 """
 
@@ -15,9 +15,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta
 
-# 连接 DB
-engine = create_engine(r'mssql+pyodbc://@SQL Server')
-print(engine.execute('select 1'), '\nSQL Server 连接正常')
+
 
 def path_date_str(n=1):
     '消费文件地址构造，默认昨日'
@@ -309,11 +307,57 @@ def after_a_year(df, col1, col2):
     except Exception as e:
         print('Tips row(173): %s' %e)
 
+def update_first_spend_date():
+    '''更新首次消费日
+    '''
+    # 1.1 筛选 basicInfo中首次消费日为null的账户
+    sql = "select 用户名 from basicInfo2 where 首次消费日 is null"
+    lis1 = (i[0] for i in engine.execute(sql).fetchall())
+    
+    # 1.2 筛选 spending中 ‘总点击’：用户名,并去重
+    # 1.3 筛除 1.1中不在1.2中的账户
+    # 1.4 如存在，查询对应账户日期并更新basicInfo
+    #
+    # 消费表中用户名去重提取
+    #
+    sql1 = "select 用户名 from 消费 where 类别='总点击'"
+    userName = set([i[0] for i in engine.execute(sql1).fetchall()])
+    
+    # 准备：
+    # 查询spending 首次消费日
+    #
+    sql2 = "select 日期 from 消费 where 用户名=%s order by 日期"
+    # 更新basicInfo2 首次消费日
+    sql3 = "update basicInfo1 set 首次消费日=%s where 用户名=%s"
+    for i in lis1:
+        # 判断 无首消费 户是否在消费表，如不在，跳过
+        if i not in userName:
+            continue
+        else:
+            # 如在，查询最早日期，并更新basicInfo2
+            # 查询，升序
+            date_firstSpending = engine.execute(sql2, i).fetchone()[0]
+            # ‘20190528’ ==> datetime.datetime
+            date_date = datetime.strptime(date_firstSpending, '%Y%m%d')
+            # 更新basicInfo
+            engine.execute(sql3, str(date_date), i)
+            
+
 if __name__ == '__main__':
+    
+    try:
+        # 连接 DB
+        ss = "mssql+pymssql://@192.168.60.110:1433/Account Management"
+        engine = create_engine(ss)
+        if engine.execute('select 1'):
+            print('连接成功')
+    except Exception as e:
+        print('连接失败： %s' %e)
     
     #'保留测试账户，进行测试'  --已
     run()  # 测试
     # initBasicInfo()  # 初始化；从桌面读入基本信息，整理
     read_file()
     new_b()
+    update_first_spend_date()
     pass
