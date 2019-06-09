@@ -13,7 +13,7 @@ from xlwings import constants
 
 star = time.clock()
 
-DATE = '20190522'  # 改1
+DATE = '20190604'  # 改1
 target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE
 server_name = 'SZ-CS-0038LT\SQLEXPRESS'
 db_name = 'CSA_2019Q2'
@@ -655,21 +655,21 @@ order by a.销售, [NB Month]
 # P4P
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()
-sht['A3'].value = list(map(list, item))
+sht['A4'].value = list(map(list, item))
 # NP
 cursor.execute(sql.replace('P4P_20190402', 'NP_'+DATE))
 item = cursor.fetchall()
-sht['E3'].value = list(map(list, item))
+sht['E4'].value = list(map(list, item))
 # Infeeds
 cursor.execute(sql.replace('P4P_20190402', 'Infeeds_'+DATE))
 item = cursor.fetchall()
-sht['I3'].value = list(map(list, item))
+sht['I4'].value = list(map(list, item))
 # All
-sht['M3'].value = sht['I3:J'+str(len(item)+2)].value
+# sht['O3'].value = sht['I3:J'+str(len(item)+2)].value
 rows101 = sht['A1'].current_region.rows.count
 if rows101 > rows100:
-    rng100 = sht['O'+str(rows100)+':P'+str(rows100)]
-    rng101 = sht['O'+str(rows100)+':P'+str(rows101)]
+    rng100 = sht['M'+str(rows100)+':R'+str(rows100)]
+    rng101 = sht['M'+str(rows100)+':R'+str(rows101)]
     rng100.api.AutoFill(rng101.api, constants.AutoFillType.xlFillCopy)
 
 wb.app.calculation = 'automatic'
@@ -709,7 +709,7 @@ wb.save()
 wb.close()
 
 
-# Excel File: Sales Tracking Report
+    # Excel File: Sales Tracking Report
 # 销售
 # 1.修改where
 wb = xw.Book(target+'\\'+os.listdir(target)[8])
@@ -733,7 +733,22 @@ cursor.execute(sql.replace('P4P_20190402', 'NP_'+DATE))
 item = cursor.fetchall()
 sht['A17'].value = list(map(list, item))
 # Infeeds
-cursor.execute(sql.replace('P4P_20190402', 'Infeeds_'+DATE))
+# sql
+sql = '''
+select a.NB, a.销售, sum([Apr Eligible Spending]+[Apr Eligible Spending]*0.0789313904068002/0.18) as Apr_Eligible_Spending, 
+sum([May Eligible Spending]+[May Eligible Spending]*0.0789313904068002/0.18) as May_Eligible_Spending, 
+sum([Jun Eligible Spending]+[Jun Eligible Spending]*0.0789313904068002/0.18) as Jun_Eligible_Spending, 
+sum([Apr Eligible Spending Forecast]+[Apr Eligible Spending Forecast]*0.0789313904068002/0.18) as Apr_Eligible_Spending_Forecast, 
+sum([May Eligible Spending Forecast]+[May Eligible Spending Forecast]*0.0789313904068002/0.18) as May_Eligible_Spending_Forecast, 
+sum([Jun Eligible Spending Forecast]+[Jun Eligible Spending Forecast]*0.0789313904068002/0.18) as Jun_Eligible_Spending_Forecast, 
+sum([Q2 Eligible Spending Forecast]+[Q2 Eligible Spending Forecast]*0.0789313904068002/0.18) as Q2_Eligible_Spending_Forecast, 
+sum([Eligible Spending(QTD)]+[Eligible Spending(QTD)]*0.0789313904068002/0.18) as Q2_Eligible_Spending_QTD
+from Infeeds_20190522 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
+where 端口 not like '%wrong%' and a.NB not like '2017&2018EB'
+group by a.NB, a.销售
+order by a.NB, a.销售
+'''
+cursor.execute(sql.replace('Infeeds_20190522', 'Infeeds_'+DATE))
 item = cursor.fetchall()
 sht['A31'].value = list(map(list, item))
 

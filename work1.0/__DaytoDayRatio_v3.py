@@ -17,7 +17,7 @@ Created on Thu Aug 23 15:55:02 2018
 """
 
 import pandas as pd
-import datetime, time
+import datetime, time, os
 from win32com.client import Dispatch
 
 # 近5日工作日日期序列生成
@@ -467,13 +467,19 @@ if __name__ == '__main__':
     wb1 = excel.Workbooks.Open(giveName())
     sht1 = wb1.Worksheets('环比汇总表')
     
-    wb2 = excel.Workbooks.Open(sourceData()[0])
+    yesDateStr = (datetime.date.today()-datetime.timedelta(1)).strftime('%Y.%m.%d')
+    fileName = 'P4P 消费报告' + yesDateStr + '.xlsx'
+    filePath = r'c:\users\chen.huaiyu\desktop'
+    path = os.path.join(filePath, fileName)
+    wb2 = excel.Workbooks.Open(path)
     sht2 = wb2.Worksheets('P4P消费')
     
     sht2.Copy(sht1)
     wb1.Save()
-    wb1.Close()
-    wb2.Close()
+    #wb1.Close()
+    #wb2.Close()
+    
+    
     '''
     # 邮件加载附件发送
     from email.mime.text import MMIMEText

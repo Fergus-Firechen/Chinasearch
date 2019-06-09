@@ -5,7 +5,6 @@ Created on Mon Dec 24 10:19:36 2018
 @author: chen.huaiyu
 """
 
-
 '''   分割：准备  '''
 
 # 批量修改文件名
@@ -13,8 +12,8 @@ import os
 import shutil
 import xlwings as xw
 
-date_file = '20190514'
-DATE = '20190522'  # 改1
+date_file = '20190529'
+DATE = '20190604'  # 改1
 
 # eg.规范命命：ave.workday&weekdayq4(2018 oct_dec)2019.01.02_v3
 # wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2018 Oct_Dec) ' + DATE_ + 'v1.xlsx')
