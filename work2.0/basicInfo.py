@@ -109,7 +109,7 @@ def read_file():
     if os.path.exists(path):
         df_i = pd.read_csv(path, encoding='gbk', engine='python')
     else:
-        raise 'Tips: path，路径文件不存在；'
+        raise 'Tips: df_i 路径文件不存在：%s'
     
     'icrm 转换'
     df_normal.set_index('第三方', drop=True, inplace=True)
