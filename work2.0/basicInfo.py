@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 
 
 
-def path_date_str(n=1):
+def path_date_str(n):
     '消费文件地址构造，默认昨日'
     yes_str = datetime.strftime(datetime.today() - timedelta(n), "%Y%m%d")
     path = os.chdir(r"c:\Users\chen.huaiyu\downloads")
@@ -56,7 +56,7 @@ def initBasicInfo(path):
     从桌面获取  基本信息
     '''
     dic = {'用户名':str, '信誉成长值':str, '客户':str, '网站名称':str, '广告主':str}
-    df = pd.read_excel(path, sheet_name='基本信息', converters=dic)
+    df = pd.read_excel(path, converters=dic)
     # 1.修改序号列 为 “Id”
     df.rename(columns={df.columns[0]:'Id'}, inplace=True)
     # 2.统一时间
@@ -65,7 +65,7 @@ def initBasicInfo(path):
 
 def initBasicInfo2(df):
     # 复位ID
-    df['Id'] = df_b.index.tolist()
+    df['Id'] = df_b.index
     df = df.reindex(columns=col('basicInfo'))
     # 复位信誉值 ==>str
     df['信誉成长值'] = df['信誉成长值'].astype(str)
@@ -85,16 +85,17 @@ def col(args):
 def df(args):
     df = pd.DataFrame(data(args), columns=col(args))
     if 'Id' in col(args):
+        df.index = df['Id']
         df.drop(columns=['Id'], inplace=True)
     return df
 
 @cost_time
-def read_file():
+def read_file(n):
     '读取数据'
     # 临时全局变量
     global df_b, df_i, df_kh, df_em, df_p
     # 文件地址
-    path = path_date_str()
+    path = path_date_str(n)
     # accountApplication
     df_kh = df('开户申请表')
     # basicInfo
@@ -221,19 +222,17 @@ def new_b():
                 continue
         
         '补充手段：据端口填充端口加款客户'
-# =============================================================================
-#         for i in set(df_new['端口']):
-#             if i not in df_p.index:
-#                 raise KeyError ("新端口;端口表中缺失，请补充")
-#                 print(i)
-#                 continue
-#             elif pd.isna(df_p.loc[i, '客户']):
-#                 print('跳过 %s;因：%s' %(i, df_p.loc[i, '客户']))
-#                 continue
-#             else:
-#                 df_new.loc[df_new['端口'] == i, '客户'] = df_p.loc[i, '客户']
-#                 print(df_p.loc[i, '客户'])
-# =============================================================================
+        for i in set(df_new['端口']):
+            if i not in df_p.index:
+                raise KeyError ("新端口;端口表中缺失，请补充")
+                print(i)
+                continue
+            elif pd.isna(df_p.loc[i, '客户']):
+                print('跳过 %s;因：%s' %(i, df_p.loc[i, '客户']))
+                continue
+            else:
+                df_new.loc[df_new['端口'] == i, '客户'] = df_p.loc[i, '客户']
+                print(df_p.loc[i, '客户'])
         
         # 新旧
         from zhconv import convert
@@ -357,7 +356,7 @@ if __name__ == '__main__':
     #'保留测试账户，进行测试'  --已
     run()  # 测试
     # initBasicInfo()  # 初始化；从桌面读入基本信息，整理
-    read_file()
+    read_file(1)
     new_b()
     update_first_spend_date()
     pass

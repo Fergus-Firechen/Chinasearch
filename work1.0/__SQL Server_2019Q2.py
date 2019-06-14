@@ -13,7 +13,7 @@ from xlwings import constants
 
 star = time.clock()
 
-DATE = '20190604'  # 改1
+DATE = '20190612'  # 改1
 target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE
 server_name = 'SZ-CS-0038LT\SQLEXPRESS'
 db_name = 'CSA_2019Q2'
@@ -803,15 +803,17 @@ wb.app.calculation = 'automatic'
 wb.save()
 wb.close()
 
-
-# drop P4P & NP & Infeeds
-sql = '''
-DROP TABLE P4P_20190402
-DROP TABLE NP_20190402
-DROP TABLE Infeeds_20190402
-'''
-cursor.execute(sql.replace('20190402', DATE))
-cnxn.commit()
+# =============================================================================
+# 
+# # drop P4P & NP & Infeeds
+# sql = '''
+# DROP TABLE P4P_20190402
+# DROP TABLE NP_20190402
+# DROP TABLE Infeeds_20190402
+# '''
+# cursor.execute(sql.replace('20190402', DATE))
+# cnxn.commit()
+# =============================================================================
 
 
 print('\a耗时：%s' % str((time.clock()-star)/60))

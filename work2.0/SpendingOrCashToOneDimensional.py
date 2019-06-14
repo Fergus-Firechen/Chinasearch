@@ -163,7 +163,7 @@ if __name__ == '__main__':
         path = [r'H:\SZ_数据\Input\每日百度消费.xlsx']
         engine = create_engine("mssql+pyodbc://@SQL Server")
         # 创造一个序列实列，以便生成所需要的各种列表
-        a = array('2019-6-10', '2019-6-10', '消费')
+        a = array('2019-6-13', '2019-6-13', '消费')
         if os.path.exists(a.print_path()):
             pass
         else:

@@ -16,7 +16,7 @@ def mergeExcel():
     '''
     print('测试：\n1.默认昨日；')
     # 昨日icrm消费报告地址
-    date = datetime.datetime.strftime(datetime.datetime.today()-datetime.timedelta(1), '%Y%m%d')  # 昨日 默认1
+    date = datetime.datetime.strftime(datetime.datetime.today()-datetime.timedelta(2), '%Y%m%d')  # 昨日 默认1
     icrmPath = r'C:\Users\chen.huaiyu\Downloads\消费报告 ' + date + '_' + date + '.csv'
     # 数据读取
     ioSystem = pd.read_excel(r'H:\SZ_数据\Input\IO System.xlsx')  # 新申户
@@ -81,7 +81,7 @@ def mergeExcel():
     sht.range('A' + str(Row)).value = account2[account2['端口'] != '-'].values
     sht.range('A' + str(Row)).color = (162, 163, 165)  # RGB
     wb.save()
-    wb.app.screen_updating = True
+    wb.app.screen_updating = False
     wb.close()
     
 

@@ -61,8 +61,8 @@ def P4P():
     p4p['广告主'] = p4p['广告主'].str.upper()
     return p4p
 
-# 指定列提取:搜索(sheetN=3)
-def souSuo(sheetN=3):
+# 指定列提取:搜索(sheetN=)
+def souSuo(sheetN='搜索点击消费'):
     global date1
     date = datetime.datetime.today()
     if sourceData()[1] == '':
@@ -96,8 +96,8 @@ def souSuo(sheetN=3):
 # 指定提取：新产品
 def xinChanPin_infeeds():
     global date1
-    x3 = souSuo(4)  # 新产品，默认值：4
-    x4 = souSuo(5)  # 原生，默认值：5
+    x3 = souSuo('新产品消费（除原生广告）')  # 新产品
+    x4 = souSuo('原生广告')  # 原生
     x5 = pd.merge(x3, x4, on='用户名')
     x5[date1[0]] = x5.loc[:, str(date1[0]) + '_x'] + x5.loc[:, str(date1[0]) + '_y']
     x5[date1[1]] = x5.loc[:, str(date1[1]) + '_x'] + x5.loc[:, str(date1[1]) + '_y']
