@@ -3,6 +3,7 @@
 Created on Mon Mar 25 11:22:45 2019
 
 - 跨月数据由于百通在不同表中，无法一次性处理
+- 不用与basicInfo对应，只与消费有关
 
 @author: chen.huaiyu
 """
@@ -92,16 +93,18 @@ def dfFromDB(tableName):
 
 @cost_time
 def read_file():
-    global df1, df2, df3
+    global df1, df3  #df2, 
     '==icrm 消费csv=='
     df1 = pd.read_csv(a.print_path(), engine='python', encoding='gbk')
     df1.rename(columns={'账户名称':'用户名'}, inplace=True)
     df1['用户名'] = df1['用户名'].astype(str)
     df1.drop(columns='账户ID', inplace=True)
-    '==基本信息=='
-    df2 = dfFromDB('basicInfo')
-    df2['用户名'] = df2['用户名'].astype(str)
-    df2 = df2.loc[8:, ['区域', '用户名', '广告主']]
+# =============================================================================
+#     '==基本信息=='
+#     df2 = dfFromDB('basicInfo')
+#     df2['用户名'] = df2['用户名'].astype(str)
+#     df2 = df2.loc[8:, ['区域', '用户名', '广告主']]
+# =============================================================================
     '==百通=='
     sheet = 'P4P消费'+str(a.print_date().month)+'月'
     df3 = pd.read_excel(path[0], sheet_name=sheet).iloc[38:52,:]
@@ -139,13 +142,13 @@ def main():
     df1.fillna(0, inplace=True)
     '输出'
     df1.to_excel(r'c:\users\chen.huaiyu\Desktop\p4p 消费报告.xlsx')
-    df = pd.merge(df2, df1, on='用户名', how='left')
+    # df = pd.merge(df2, df1, on='用户名', how='left')
     '转换为一维表'
     column = ['日期', '用户名', '类别', '金额']
     df_1 = pd.DataFrame(columns=column)
     col_list = [col_all, col_p4p, col_inf, col_np, col_bt, col_mo]
     for m,j in enumerate(a.date()):
-        df_d = df[df[col_all[m]] > 0]
+        df_d = df1[df1[col_all[m]] > 0]
         if df_d.shape[0] > 10:
             for i in df_d['用户名'].tolist():
                 for n, k in enumerate(a.print_col()):
@@ -163,7 +166,7 @@ if __name__ == '__main__':
         path = [r'H:\SZ_数据\Input\每日百度消费.xlsx']
         engine = create_engine("mssql+pyodbc://@SQL Server")
         # 创造一个序列实列，以便生成所需要的各种列表
-        a = array('2019-6-13', '2019-6-13', '消费')
+        a = array('2019-6-14', '2019-6-16', '消费')
         if os.path.exists(a.print_path()):
             pass
         else:
