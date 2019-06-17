@@ -6,6 +6,8 @@ Created on Tue Mar 19 20:10:33 2019
 # DB取代文件“数据拆解表”
 # df_kh 字段名统一？
 # 20190528 增首次消费日
+# Q basicInfo乱序：删除Id前修改 index=Id  -- 2019.6.14
+# Q basicInfo乱序：从sqlserver读取basicInfo后，立即按Id进行排序  -- 2019.6.17
 @author: chen.huaiyu
 """
 
@@ -84,6 +86,7 @@ def col(args):
 
 def df(args):
     df = pd.DataFrame(data(args), columns=col(args))
+    df.sort_values('Id', ascending=True, inplace=True)
     if 'Id' in col(args):
         df.index = df['Id']
         df.drop(columns=['Id'], inplace=True)
@@ -150,34 +153,50 @@ def read2():
     pass
 
 
-def new():
-    '新消户筛选'
+def new(n):
+    '''新消户筛选：必须有消费'''
     global df_b, df_i
     # 开户/财务端口
-    Port = df_p.loc[df_p['财务&开户'].notna(), '财务&开户'].index.tolist()
+    # Port = df_p.loc[df_p['财务&开户'].notna(), '财务&开户'].index.tolist()
     acc = ['test-eee789']  # 测试账户
     
-    '删除不统计端口'
+    # '删除不统计端口：财务端口 & 开户端口'
     df_new = df_i.copy()
-    df_new.drop(index=df_new[df_new['端口'].isin(Port)].index, inplace=True)
+    # df_new.drop(index=df_new[df_new['端口'].isin(Port)].index, inplace=True)
     df_new.drop(index=df_new[df_new['用户名'].isin(acc)].index, inplace=True)
     
-    '求差集'
+    # '求差集:去除所有消费报告中已有的账户'
     df_new = df_new.append(df_b, sort=False)  # False 沉默警告，不排序
     df_new = df_new.append(df_b, sort=False)
     df_new.drop_duplicates('用户名', keep=False, inplace=True)  # 删除所有重复项
     df_new = df_new.reindex(columns=df_b.columns)
     df_new.fillna('-', inplace=True)
+    
+    # 筛选有消费的账户
+    yes_date = (datetime.today() - timedelta(n)).strftime('%Y%m%d')
+    sql = "select distinct 用户名 from 消费 where 日期=%s"
+    ls_username = [i[0] for i in engine.execute(sql, yes_date).fetchall()]
+    
+    # 去除无消费的账户
+    for i in df_new['用户名']:
+        if i in ls_username:
+            pass
+        else:
+            df_new.drop(index=df_new[df_new['用户名'] == i].index, inplace=True)
+    
     return df_new
 
 @cost_time
-def new_b():
+def new_b(n):
     '新消户数据补充'
     
     global df_em, df_new, df_b
-    df_new = new()
+    df_new = new(n)
     
-    '如有新增消费账户，则补充相关信息；'
+    # 如有新增消费账户，则：
+    # 1.补充相关信息
+    # 2.更新数据库
+    #
     if df_new.shape > (0, 29):
         '默认值'
         df_new.loc[:, 'BU'] = 'CSA'
@@ -288,10 +307,11 @@ def new_b():
             after_a_year(df_date, date, '开户日期')
             df_b.loc[df_b['用户名'].isin(df_date['用户名'].tolist()), 
                      date] = df_date[date].apply(lambda x:str(x)).values
-        # 结束,更新DB
-        initBasicInfo2(df_b).to_sql('basicInfo1', con=engine, if_exists='replace', index=False)
+        
     else:
-        pass
+        print('无新消户')
+    # 结束,更新DB
+    initBasicInfo2(df_b).to_sql('basicInfo1', con=engine, if_exists='replace', index=False)
 
 def after_a_year(df, col1, col2):
     '+ 1年'
@@ -310,7 +330,7 @@ def update_first_spend_date():
     '''更新首次消费日
     '''
     # 1.1 筛选 basicInfo中首次消费日为null的账户
-    sql = "select 用户名 from basicInfo2 where 首次消费日 is null"
+    sql = "select 用户名 from basicInfo1 where 首次消费日 is null"
     lis1 = (i[0] for i in engine.execute(sql).fetchall())
     
     # 1.2 筛选 spending中 ‘总点击’：用户名,并去重
@@ -356,7 +376,8 @@ if __name__ == '__main__':
     #'保留测试账户，进行测试'  --已
     run()  # 测试
     # initBasicInfo()  # 初始化；从桌面读入基本信息，整理
-    read_file(1)
-    new_b()
+    n = 1  # 昨日=1
+    read_file(n)
+    new_b(n)
     update_first_spend_date()
     pass
