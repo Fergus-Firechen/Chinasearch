@@ -40,17 +40,17 @@ def giveName():
 def sourceData():
     global date1
     # date3 = date1.year  # 是否跨年？  待判定
-    date2 = date1[-1].year
-    date3 = date1[0].year
+    date2 = date1[-1].strftime('%Y.')
+    date3 = date1[0].strftime('%Y')
     if date1[0].month == date1[-1].month:   # 是否跨月
-        path = (r'H:\SZ_数据\Input\P4P 消费报告' + str(date2) + '.'
-                    + str(date1[-1].month) + '...xlsx')
+        path = (r'H:\SZ_数据\Input\P4P 消费报告' + date2 +
+                 date1[-1].strftime('%m.') + '..xlsx')
         path1 = ''
     else:
-        path = (r'H:\SZ_数据\Input\P4P 消费报告' + str(date2) + '.'
-                    + str(date1[-1].month) + '...xlsx')
+        path = (r'H:\SZ_数据\Input\P4P 消费报告' + date2 + '.'
+                    + date1[-1].strftime('%m.') + '..xlsx')
         path1 = (r'H:\SZ_数据\Input\P4P 消费报告' + str(date3) + '.'
-                    + str(date1[0].month) + '...xlsx')
+                    + date1[0].strftime('%m.') + '..xlsx')
     return path, path1
 
 # P4P消费转移
