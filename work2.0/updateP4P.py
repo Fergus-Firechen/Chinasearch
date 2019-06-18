@@ -153,7 +153,7 @@ class Excel(object):
         sht[2, 2].value = '环比增长额\n%s日环比%s日' % (date1.day, date2.day)
         cnt1 = sht['A3:AJ3'].value.index(date1)
         cnt2 = sht['A3:AJ3'].value.index(date2)
-        for i in range(3, 19):
+        for i in range(3, 20):
             sht[i, 2].value = sht[i, cnt1].value - sht[i, cnt2].value  # 环比增长额
             if sht[i, cnt2].value == 0:
                 sht[i, 3].value = 0
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     
     # 日期锁定
     star = time.perf_counter()
-    dateStr = pd.date_range(start='20190615', periods=2)
+    dateStr = pd.date_range(start='20190617', periods=1)
     for i in dateStr:
         main(dateStr=i.strftime('%Y%m%d'))
     stop = time.perf_counter()
