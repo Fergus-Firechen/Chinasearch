@@ -170,6 +170,6 @@ def mainIO(n, path):
 if __name__ == '__main__':
     # 账号密码 配置文件地址
     path = r'c:\users\chen.huaiyu\Desktop\Input\c.s.conf'
-    mainIO(1, path)
+    mainIO(8, path)
     pass
         

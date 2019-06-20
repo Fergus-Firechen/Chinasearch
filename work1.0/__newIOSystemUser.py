@@ -82,7 +82,7 @@ def mergeExcel():
     sht.range('A' + str(Row)).color = (162, 163, 165)  # RGB
     wb.save()
     wb.app.screen_updating = False
-    wb.close()
+    #wb.close()
     
 
 if __name__ == '__main__':
