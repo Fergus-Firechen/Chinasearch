@@ -129,7 +129,7 @@ class Excel(object):
                 sht[cntSta:cntEnd, 47:ll.index(date_date)].value = 0
                 # 填充格式
                 for i in range(7, 13):
-                    sht[cntSta:cntEnd, :ll.index(date_date)+1].api.Borders(i).lineStyle = 1
+                    sht[cntSta-30:cntEnd, :ll.index(date_date)+1].api.Borders(i).lineStyle = 1
         except Exception as e:
             print('toExcel产生异常：{}'.format(e))
             
@@ -187,13 +187,19 @@ def main(dateStr):
     # wb.close()
     print('\a程序结束')
     
+    
 if __name__ == '__main__':
     
     # 日期锁定
     star = time.perf_counter()
-    dateStr = pd.date_range(start='20190617', periods=1)
-    for i in dateStr:
-        main(dateStr=i.strftime('%Y%m%d'))
-    stop = time.perf_counter()
-    print('\a耗时：%.3f min' % ((stop - star)/60))
+    start = input('输入起始日期(20190101)：')
+    periods = eval(input('输入持续日期数(1,2,...,n)：'))
+    # 输入参数检查
+    if datetime.strptime(start, '%Y%m%d') and isinstance(periods, int):
+        print(start, periods)
+        dateStr = pd.date_range(start=start, periods=periods)
+        for i in dateStr:
+            main(dateStr=i.strftime('%Y%m%d'))
+        stop = time.perf_counter()
+        print('\a耗时：%.3f min' % ((stop - star)/60))
     pass

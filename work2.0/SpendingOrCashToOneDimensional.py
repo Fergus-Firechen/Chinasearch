@@ -166,7 +166,13 @@ if __name__ == '__main__':
         path = [r'H:\SZ_数据\Input\每日百度消费.xlsx']
         engine = create_engine("mssql+pyodbc://@SQL Server")
         # 创造一个序列实列，以便生成所需要的各种列表
-        a = array('2019-6-17', '2019-6-17', '消费')
+        star = input('输入起始日期(2019-01-01):')
+        stop = input('输入终止日期(2019-01-01):')
+        val = input('消费/现金？(默认消费):')
+        if val == '':
+            val = '消费'
+        print(val)
+        a = array(star, stop, val)
         if os.path.exists(a.print_path()):
             pass
         else:

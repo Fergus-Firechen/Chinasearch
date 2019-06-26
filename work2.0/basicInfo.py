@@ -173,9 +173,8 @@ def new(n):
     df_new.fillna('-', inplace=True)
     
     # 筛选有消费的账户
-    yes_date = (datetime.today() - timedelta(n)).strftime('%Y%m%d')
-    sql = "select distinct 用户名 from 消费 where 日期=%s"
-    ls_username = [i[0] for i in engine.execute(sql, yes_date).fetchall()]
+    sql = "select distinct 用户名 from 消费"
+    ls_username = [i[0] for i in engine.execute(sql).fetchall()]
     
     # 去除无消费的账户
     for i in df_new['用户名']:
@@ -311,7 +310,7 @@ def new_b(n):
     else:
         print('无新消户')
     # 结束,更新DB
-    initBasicInfo2(df_b).to_sql('basicInfo1', con=engine, if_exists='replace', index=False)
+    initBasicInfo2(df_b).to_sql('basicInfo', con=engine, if_exists='replace', index=False)
 
 def after_a_year(df, col1, col2):
     '+ 1年'
@@ -330,7 +329,7 @@ def update_first_spend_date():
     '''更新首次消费日
     '''
     # 1.1 筛选 basicInfo中首次消费日为null的账户
-    sql = "select 用户名 from basicInfo1 where 首次消费日 is null"
+    sql = "select 用户名 from basicInfo where 首次消费日 is null"
     lis1 = (i[0] for i in engine.execute(sql).fetchall())
     
     # 1.2 筛选 spending中 ‘总点击’：用户名,并去重
@@ -347,7 +346,7 @@ def update_first_spend_date():
     #
     sql2 = "select 日期 from 消费 where 用户名=%s order by 日期"
     # 更新basicInfo2 首次消费日
-    sql3 = "update basicInfo1 set 首次消费日=%s where 用户名=%s"
+    sql3 = "update basicInfo set 首次消费日=%s where 用户名=%s"
     for i in lis1:
         # 判断 无首消费 户是否在消费表，如不在，跳过
         if i not in userName:

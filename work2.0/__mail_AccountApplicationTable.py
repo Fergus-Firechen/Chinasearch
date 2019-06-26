@@ -209,7 +209,7 @@ def dataCleaning(dic):
     # '合并 去重'
     global df
     df = df.append(df1, ignore_index=True, sort=False)
-    df.drop_duplicates('用户名', keep='last', inplace=True)
+    df.drop_duplicates('用户名', keep='first', inplace=True)
 
 def normalFormat(df):
     '''格式化：日期+str
@@ -272,7 +272,7 @@ def dfNull(dat=None):
     import numpy as np
     dff = pd.DataFrame(np.zeros((1,len(columns))), columns=columns)
     if dat == None:
-        dff['日期'] = datetime.datetime.now()-datetime.timedelta(hours=1)
+        dff['日期'] = datetime.datetime.now()-datetime.timedelta(hours=24)
     else:
         dff['日期'] = dat
     # 格式化
