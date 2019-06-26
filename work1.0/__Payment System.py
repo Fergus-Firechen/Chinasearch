@@ -14,7 +14,7 @@ import xlwings as xw
 
 path = [r'H:\SZ_数据\Input\P4P 消费报告2019.06...xlsx', 
         r'D:\陈怀玉\工作\周工作\Payment System\Channel.csv',
-        r'D:\陈怀玉\工作\周工作\Payment System\系統-_201906_Master-3.xlsm']
+        r'D:\陈怀玉\工作\周工作\Payment System\系統-_201906_Master-5.xlsm']
 
 i = '19年已消费'
 
