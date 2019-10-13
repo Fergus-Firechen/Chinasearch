@@ -11,6 +11,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 import time, functools, os
 import pandas as pd
+import configparser
 
 
 class array(object):
@@ -99,27 +100,44 @@ def read_file():
     df1.rename(columns={'账户名称':'用户名'}, inplace=True)
     df1['用户名'] = df1['用户名'].astype(str)
     df1.drop(columns='账户ID', inplace=True)
-# =============================================================================
-#     '==基本信息=='
-#     df2 = dfFromDB('basicInfo')
-#     df2['用户名'] = df2['用户名'].astype(str)
-#     df2 = df2.loc[8:, ['区域', '用户名', '广告主']]
-# =============================================================================
     '==百通=='
     sheet = 'P4P消费'+str(a.print_date().month)+'月'
-    df3 = pd.read_excel(path[0], sheet_name=sheet).iloc[38:52,:]
+    df3 = pd.read_excel(r'H:\SZ_数据\Input\每日百度消费.xlsx', sheet_name=sheet).iloc[38:55,:]
     '结构整理'
     df3.iloc[0, 0] = '用户名'
     df3.columns = df3.iloc[0, :].tolist()
     df3.drop(index=[38], inplace=True)
     df3.drop(columns='总计', inplace=True)
-    #df3.drop(columns=df3.columns.tolist()[-3:], inplace=True)  #
     df3.set_index('用户名', drop=True, inplace=True)
     df3.columns = [i.strftime('%Y%m%d') for i in df3.columns]
     df3 = df3.loc[:, a.date()[0]:a.date()[-1]]
-    #df3.drop(index=[df3.index.tolist()[-1]], inplace=True)  #
     df3.columns = a.field()[4]
     
+def upload_ka(start, stop):
+    
+    def strf(arg):
+        s = strToDate(arg)
+        return s.strftime('%Y%m%d')
+    
+    path = r"c:\users\chen.huaiyu\downloads"
+    fil = '代理商用户报表_订单明细日粒度下载_%s-%s.csv' % (strf(start), strf(stop))
+    ka = pd.read_csv(os.path.join(path, fil), encoding='GBK')
+
+    # 筛选符合条件的数据
+    ka.drop(index=ka[ka['合同号'] == 'A17KA1289'].index, inplace=True)
+    ka.drop(index=ka[ka['广告主名称'] == '草莓有限公司'].index, inplace=True)
+
+    # 调整
+    ka.rename(columns={'发生日期':'日期', '收入金额':'金额', '合同号':'用户名'}, inplace=True)
+    ka['类别'] = 'KA'
+    ka_1 = ka[['日期', '金额', '用户名', '类别']]
+    ka_1['日期'] = pd.to_datetime(ka_1['日期'])
+    ka_1['日期'] = ka_1['日期'].apply(lambda x: x.strftime('%Y%m%d'))
+    ka_1['金额'] = ka_1['金额'].str.replace(',', '')
+    ka_1['金额'] = ka_1['金额'].apply(lambda x: eval(x))
+    ka_1.to_sql('消费', con=engine, if_exists='append', index=False, chunksize=1000)
+    
+
 @cost_time
 def main():
     global df1
@@ -131,7 +149,9 @@ def main():
     '+百通'
     df1.set_index('用户名', drop=True, inplace=True)
     for i in range(len(col_all)):
+        print(i)
         for j in df3.index:
+            print(j)
             df1.loc[j, col_all[i]] = df1.loc[j, col_all[i]] + df3.loc[j, 
                                        col_bt[i]]
             df1.loc[j, col_np[i]] = df1.loc[j, col_np[i]] + df3.loc[j, 
@@ -140,9 +160,6 @@ def main():
     df1.reset_index(inplace=True)
     df1 = pd.merge(df1, df3, how='left', on='用户名')
     df1.fillna(0, inplace=True)
-    '输出'
-    df1.to_excel(r'c:\users\chen.huaiyu\Desktop\p4p 消费报告.xlsx')
-    # df = pd.merge(df2, df1, on='用户名', how='left')
     '转换为一维表'
     column = ['日期', '用户名', '类别', '金额']
     df_1 = pd.DataFrame(columns=column)
@@ -158,13 +175,31 @@ def main():
         else:
             continue
     '输出'
-    df_1.to_sql(a.target, con=engine, if_exists='append', index=False)
+    df_1.to_sql(a.target, con=engine, if_exists='append', index=False, chunksize=100)
     
-if __name__ == '__main__':
-    
+def connectDB():
+    def login():
+        CONF = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
+        conf = configparser.ConfigParser()
+        if os.path.exists(CONF):
+            conf.read(CONF)
+            host = conf.get('SQL Server', 'ip')
+            port = conf.get('SQL Server', 'port')
+            dbname = conf.get('SQL Server', 'dbname')
+            return host, port, dbname
     try:
-        path = [r'H:\SZ_数据\Input\每日百度消费.xlsx']
-        engine = create_engine("mssql+pyodbc://@SQL Server")
+        engine = create_engine(
+                "mssql+pymssql://@%s:%s/%s" % login())
+    except Exception as e:
+        print('连接失败 %s' % e)
+    else:
+        print('连接成功')
+        return engine
+
+if __name__ == '__main__':
+    try:
+        # 连接 DB
+        engine = connectDB()
         # 创造一个序列实列，以便生成所需要的各种列表
         star = input('输入起始日期(2019-01-01):')
         stop = input('输入终止日期(2019-01-01):')
@@ -186,6 +221,7 @@ if __name__ == '__main__':
         run()
         read_file()
         main()
+        upload_ka(star, stop)
     finally:
         print('程序结束')
     

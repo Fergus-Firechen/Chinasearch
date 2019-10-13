@@ -5,9 +5,7 @@ Created on Mon Apr  8 09:38:35 2019
 # 2019.4.16 增日志模块
 # 2019.4.17 增空行标识行；1）标识程序运行日期(check点);2)提升运行效率;
 # 逻辑错误：
-# 2019.10.12 仅上载新增用户
-
-# 2019.9.24 开户申请表模版修改
+# 
 @author: chen.huaiyu
 """
 
@@ -18,7 +16,6 @@ from email.utils import parseaddr
 from sqlalchemy import create_engine
 import pandas as pd
 import logging.config
-import configparser
 
 
 def cost_time(func):
@@ -137,7 +134,7 @@ def getForm(infobox):
         for col in p2.findall(row):
             if '公司名称' in col:
                 # '表单未统一/自行调整了'
-                a_list.append('公司名称')
+                a_list.append('广告主名称')
                 continue
             elif '简体' in col:
                 # '部分表单中：广告主名称（简体）'
@@ -180,7 +177,6 @@ def dataCleaning(dic):
     '''对邮件抓取到的数据进行清洗
     '''
     df1 = pd.DataFrame(dic)
-    print(df1)
     # '军朗 填充'
     try:
         if df1.loc[1, '端口'] in('baidu-Junlang', 'csa-baidu-ogilvy', 'baidu-ogilvy'):
@@ -210,12 +206,10 @@ def dataCleaning(dic):
     df1 = regulatorInformation(df1, '客服')
     df1 = regulatorInformation(df1, '渠道')
     df1 = regulatorInformation(df1, '端口')
-    # '合并 求差集'
+    # '合并 去重'
     global df
-    df = df.append(df, sort=False)
-    df = df.append(df1, sort=False)
-    df.drop_duplicates('用户名', keep=False, inplace=True)
-    
+    df = df.append(df1, ignore_index=True, sort=False)
+    df.drop_duplicates('用户名', keep='first', inplace=True)
 
 def normalFormat(df):
     '''格式化：日期+str
@@ -288,7 +282,7 @@ def dfNull(dat=None):
 def restore(dat=None):
     '''异常恢复/增加标识行'''
     logger.info('Start:异常恢复/增加标识行')
-    dfNull(dat).to_sql('开户申请表', con=engine, if_exists='append', index=False)
+    dfNull(dat).to_sql('开户申请表1', con=engine, if_exists='append', index=False)
     logger.info('End:异常恢复/增加标识行')
 
 @cost_time
@@ -299,6 +293,7 @@ def mainKH(date_0, sec, path):
     try:
         logger.info('Tips: catch the frequency %ss', sec)
         if os.path.exists(path):
+            import configparser
             conf = configparser.ConfigParser()
             conf.read(path)
         else:
@@ -340,8 +335,8 @@ def mainKH(date_0, sec, path):
         #
         global df
         df['Id'] = df.index.tolist()
-        df = df.reindex(columns=col('开户申请表'))
-        df.to_sql('开户申请表', con=engine, if_exists='append', index=False)
+        df = df.reindex(columns=col('开户申请表1'))
+        df.to_sql('开户申请表1', con=engine, if_exists='replace', index=False)
         restore()
     except FileExistsError as e:
         # 复位
@@ -377,23 +372,6 @@ def dff(args):
         df.drop(columns=['Id'], inplace=True)
     return df
 
-def connectDB():
-    def login():
-        conf = configparser.ConfigParser()
-        if os.path.exists(path):
-            conf.read(path)
-            host = conf.get('SQL Server', 'ip')
-            port = conf.get('SQL Server', 'port')
-            dbname = conf.get('SQL Server', 'dbname')
-            return host, port, dbname
-    try:
-        engine = create_engine(
-                "mssql+pymssql://@%s:%s/%s" % login())
-    except Exception as e:
-        print('连接失败 %s' % e)
-    else:
-        return engine
-    
 
 try:
     # 账号密码 配置文件地址
@@ -405,23 +383,22 @@ try:
     logger = logging.getLogger('chinaSearch')
     
     # 连接SQL Server
+    
     # 连接 DB
-    #ss = "mssql+pymssql://sa:cs_holly123@192.168.1.5:1433/Account Management"
-    #engine = create_engine(ss)
-    engine = connectDB()
+    ss = "mssql+pymssql://sa:cs_holly123@192.168.60.110:1433/Account Management"
+    engine = create_engine(ss)
     if engine.execute('select 1'):
         print('连接成功')
         logger.info('\nSQL Server 连接正常')
         
-        columns = col('开户申请表', del_col=1)
+        columns = col('开户申请表1', del_col=1)
         #'据数据库中最近日期判定抓取日期'
-        date_0 =  engine.execute('''select 日期 from 开户申请表 order by 日期 desc'''
+        date_0 = engine.execute('''select 日期 from 开户申请表1 order by Id desc'''
                                   ).fetchone()[0]
-        print('触发日期：%s' % date_0)
         
         # 删除DB中标识项
-        engine.execute("DELETE FROM 开户申请表 WHERE 用户名 = '0.0'")
-        df = dff('开户申请表')
+        engine.execute("DELETE FROM 开户申请表1 WHERE 用户名 = '0.0'")
+        df = dff('开户申请表1')
     
         # 主程序
         mainKH(date_0, 1, path)

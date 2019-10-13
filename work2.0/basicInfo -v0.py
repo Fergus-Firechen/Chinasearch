@@ -10,10 +10,8 @@ Created on Tue Mar 19 20:10:33 2019
 # Q basicInfo乱序：从sqlserver读取basicInfo后，立即按Id进行排序  -- 2019.6.17
 @author: chen.huaiyu
 """
-import os
-import time
-import functools
-import configparser
+
+import time, functools, os
 import pandas as pd
 #import xlwings as xw
 from sqlalchemy import create_engine
@@ -59,7 +57,7 @@ def initBasicInfo(path):
     '''初始化
     从桌面获取  基本信息
     '''
-    dic = {'用户名':str, '客户':str, '网站名称':str, '广告主':str}
+    dic = {'用户名':str, '信誉成长值':str, '客户':str, '网站名称':str, '广告主':str}
     df = pd.read_excel(path, converters=dic)
     # 1.修改序号列 为 “Id”
     df.rename(columns={df.columns[0]:'Id'}, inplace=True)
@@ -71,10 +69,11 @@ def initBasicInfo2(df):
     # 复位ID
     df['Id'] = df_b.index
     df = df.reindex(columns=col('basicInfo'))
+    # 复位信誉值 ==>str
+    df['信誉成长值'] = df['信誉成长值'].astype(str)
     df = dff(df)
-    # 排除用户名、端口、广告主 包含'\r\n'
-    # 信誉成长值 == 二级行业
-    ls = ['用户名', '端口', '广告主', 'URL', '网站名称', 'Industry', '信誉成长值']
+    # 排除用户名、端口、广告主 包含'\r\n'    
+    ls = ['用户名', '端口', '广告主', 'URL', '网站名称', 'Industry']
     for i in ls:
         df[i] = df[i].str.replace('\r\n', '')
     return df
@@ -132,7 +131,7 @@ def read_file(n):
     for n in range(len(lis_index)):
         df_b.loc[lis_index[n], '用户名'] = lis_user[n]
     '基本信息更新'
-    lis1 = ['URL', '加V缴费到期日', '端口', '网站名称', 
+    lis1 = ['信誉成长值', 'URL', '加V缴费到期日', '端口', '网站名称', 
             '主体资质到期日', '今日账户状态', '开户日期']
     # 如无开户日期则不更新；
     if '开户日期' not in df_i.columns.tolist():
@@ -206,7 +205,8 @@ def new_b(n):
         df_new.loc[:, 'BU'] = 'CSA'
         df_new.loc[:, '下单方'] = '海外渠道'
         '开户申请表'
-        col1 = ['销售', 'AM', '资质归属地', '公司总部', 'Region', 'channel', '客户']
+        col1 = ['销售', 'AM', '资质归属地', '公司总部', 'Region', 
+                'Industry', 'channel', '客户']
         for i in df_new['用户名'].tolist():
             for j in col1:
                 try:
@@ -215,16 +215,6 @@ def new_b(n):
                 except Exception as e:
                     print('\a\a Error Row(141): 开户申请表无账户 %s\n%s' % (i,e))
                     continue
-        # 一级行业 & 二级行业   
-        for i in df_new['用户名'].tolist():
-            try:
-                df_new.loc[df_new['用户名'] == i, 
-                           'Industry'] = df_kh.loc[df_kh['用户名'] == i, '一级行业'].values[0]
-                df_new.loc[df_new['用户名'] == i,
-                           '信誉成长值'] = df_kh.loc[df_kh['用户名'] == i, '二级行业'].values[0]
-            except Exception as e:
-                print('\a\a Error Row(141): 开户申请表无账户 %s\n%s' % (i,e))
-                continue
         '标准化'
         # 广告主
         df_new['广告主'] = df_new['广告主'].str.title()
@@ -233,8 +223,9 @@ def new_b(n):
         ## '军朗'   使用端口判定
         lis1 = df_p.loc[df_p['客户'] == '北京军朗广告有限公司', 
                         '客户'].index.tolist()
-        lis2 = ['顾凡凡', '陈宛欣', '香港', '香港', '香港', '代理商']
-        col3 = ['销售', 'AM', '资质归属地', '公司总部', 'Region', 'channel']
+        lis2 = ['顾凡凡', '陈宛欣', '香港', '香港', '香港', '代理商', '软件游戏']
+        col3 = ['销售', 'AM', '资质归属地', '公司总部', 'Region', 'channel',
+                'Industry']
         for n,i in enumerate(col3):
             df_new.loc[df_new['端口'].isin(lis1), i] = lis2[n]
         ## AM
@@ -384,30 +375,17 @@ def update_first_spend_date():
             # 更新basicInfo
             engine.execute(sql3, str(date_date), i)
             
-def connectDB():
-    def login():
-        CONF = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
-        conf = configparser.ConfigParser()
-        if os.path.exists(CONF):
-            conf.read(CONF)
-            host = conf.get('SQL Server', 'ip')
-            port = conf.get('SQL Server', 'port')
-            dbname = conf.get('SQL Server', 'dbname')
-            return host, port, dbname
-    try:
-        engine = create_engine(
-                'mssql+pymssql://@%s:%s/%s' % login())
-    except Exception as e:
-        print('连接成功 %s' % e)
-    else:
-        print('连接成功')
-        return engine
-
 
 if __name__ == '__main__':
     
-    # 连接 DB
-    engine = connectDB()
+    try:
+        # 连接 DB
+        ss = "mssql+pymssql://sa:cs_holly123@192.168.60.110:1433/Account Management"
+        engine = create_engine(ss)
+        if engine.execute('select 1'):
+            print('连接成功')
+    except Exception as e:
+        print('连接失败： %s' %e)
     
     #'保留测试账户，进行测试'  --已
     run()  # 测试
