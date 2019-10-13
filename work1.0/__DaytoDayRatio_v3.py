@@ -47,8 +47,8 @@ def sourceData():
                  date1[-1].strftime('%m.') + '..xlsx')
         path1 = ''
     else:
-        path = (r'H:\SZ_数据\Input\P4P 消费报告' + date2 + '.'
-                    + date1[-1].strftime('%m.') + '..xlsx')
+        path = (r'H:\SZ_数据\Input\P4P 消费报告' + date2 +
+                date1[-1].strftime('%m.') + '..xlsx')
         path1 = (r'H:\SZ_数据\Input\P4P 消费报告' + str(date3) + '.'
                     + date1[0].strftime('%m.') + '..xlsx')
     return path, path1
@@ -232,7 +232,7 @@ def ringSummary():
     list_1 = []
     list_2 = []
     for i in rs1.loc[:, 'AM']:
-        if i in ['黄希腾', '赵宗州', '李裕玲']:
+        if i in ['黄希腾', '李裕玲']:
             list_1.append('深圳区')
             list_2.append('麦静施')
         elif i in ['鲁东栋', '陈宛欣']:
@@ -244,9 +244,6 @@ def ringSummary():
         elif i in ['Jacqueline',  'Estelle', 'Jessie']:
             list_1.append('香港区')
             list_2.append('Billy组')
-        elif i in ['Stella', 'Yiwen']:
-            list_1.append('SG区')
-            list_2.append('SG')
         else:
             list_1.append('-')
             list_2.append('-')
@@ -366,24 +363,28 @@ if __name__ == '__main__':
 #     # 注意AM变更,list中数需要修改
 # =============================================================================
     for n, item in enumerate(summary.values):
-        if n in [2, 6, 10, 15, 19]:  # ！！
+        if n in [2, 5, 10, 14]:  # ！！
             worksheet1.write_row(n+1, 0, item, formatGroup)
-        elif n in [3, 11, 20]:  # ！！
+        elif n in [6, 15]:  # ！！
             worksheet1.write_row(n+1, 0, item, formatArea)
         else:
             worksheet1.write_row(n+1, 0, item, formatAm)
             worksheet1.conditional_format('E'+str(n+2)+':'+'G'+str(n+2), {'type': 'cell', 
                                           'criteria': '<', 'value': 0, 'format': format1})  # 条件格式；实际对应的表单
     # 3.合并区域
-    center = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'bold': True})
-    worksheet1.merge_range('A2:A5', 'SG区', center)
+# =============================================================================
+#     center = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'bold': True})
+#     worksheet1.merge_range('A2:A5', 'SG区', center)
+# =============================================================================
     centerBg1 = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'bold': True, 'bg_color': '#7799A6'})
-    worksheet1.merge_range('A6:A13', '深圳区', centerBg1)
+    worksheet1.merge_range('A2:A8', '深圳区', centerBg1)
     centerBg2 = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'bold': True, 'bg_color': '#F2B705'})
-    worksheet1.merge_range('A14:A22', '香港区', centerBg2)
-    # 4.隐藏SG区
-    for n in range(list(summary['区域']).count('SG区')):
-        worksheet1.set_row(n + 1, None, None, {'hidden':True})  # 隐藏“SG区”
+    worksheet1.merge_range('A9:A17', '香港区', centerBg2)
+# =============================================================================
+#     # 4.隐藏SG区
+#     for n in range(list(summary['区域']).count('SG区')):
+#         worksheet1.set_row(n + 1, None, None, {'hidden':True})  # 隐藏“SG区”
+# =============================================================================
     
     
     ### 【账户消费环比】格式设置
@@ -476,8 +477,8 @@ if __name__ == '__main__':
     
     sht2.Copy(sht1)
     wb1.Save()
-    #wb1.Close()
-    #wb2.Close()
+    wb1.Close()
+    wb2.Close()
     
     
     '''

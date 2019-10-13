@@ -21,12 +21,13 @@ today = datetime.datetime.today()
 # 输入
 # 1.N:前1日=1；前2日=0；前3日=-1...依次类推
 # 
-N = 1
+N = 10  # 改2
 # 修改 AVG.日期
 Yesterday = today-datetime.timedelta(N)
 
 # 直接引用邮件中文件
-wb1 = xw.books('P4P 消费报告2019.6.19.xlsx')
+wb1 = xw.Book(r'H:\SZ_数据\Input\P4P 消费报告2019.09...xlsx')
+#wb1 = xw.books(r'P4P 消费报告2019.08..')
 
 sht1 = wb1.sheets['P4P消费']
 sht20 = wb1.sheets['搜索点击消费']
@@ -64,9 +65,9 @@ range30 = sht30[9:row11, column11:column12 + 1]
 range40 = sht40[9:row11, column11:column12 + 1]
 
 
-# 繁
+# 繁  # 改 1
 wb2 = xw.Book(
-        r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ2(2019 Apr_Jun)2019.06.19.xlsx')
+        r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ3(2019 Jul_Sep)2019.09.30.xlsx')
 
 # 简 wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4- 2018.12.23(simplified)-v1.xlsx')
 # wb2 = xw.books('Ave.workday&weekdayQ4- 2018.12.23(simplified)')
@@ -144,24 +145,33 @@ for i in [sht2, sht3, sht4]:
         i[row200:row201, :].api.Borders(j).LineStyle = 1
         i[row200:row201, :].current_region.api.Borders(j).weight = 2
     for j in i['S' + str(row200) + ':S' + str(row201)]:
-        if j.value == '北京军朗广告有限公司':  # 标识军朗账户 s列
+        if j.value in ['北京军朗广告有限公司', '企游科技有限公司']:  # 标识军朗账户 s列
             rng = j.get_address().replace('S', 'I')
             i[rng].color = (146, 208, 80)
 # wb2.save()
 
 # 最近2日列
-co = 'eb'
-lu = 'ea'
+co = 'ev'
+lu = 'ew'
 
 
-'''  均值 '''
-for i in [sht2, sht3, sht4]:
-    i['MD3'].formula = '=average(ea3:ed3,eg3:ei3)'  # 工；繁版；周三；改！
-    i['ME3'].formula = '=average(dx3:dy3,ee3:ef3)'
-    # '''
-    i['MD3:ME3'].api.AutoFill(i['MD3:ME' + str(row201)].api, constants.AutoFillType.xlFillCopy)
-    print('耗时：{:3f}'.format((time.clock() - start)/60))
-    
+# =============================================================================
+# '''  均值 '''
+# for i in [sht2, sht3, sht4]:
+#     
+# # =============================================================================
+# #     # 月度总消费
+# #     i['MJ3'].value = 0
+# #     i['MK3'].value = 0
+# # =============================================================================
+#     i['MJ3'].formula = '=average(em3:en3,eq3:eu3)'  # 工；繁版；周三；改！
+#     i['MK3'].formula = '=average(eo3:ep3,ev3:ew3)'
+#     # '''
+#     i['MJ3:MK3'].api.AutoFill(i['MJ3:MK' + str(row201)].api, constants.AutoFillType.xlFillCopy)
+#     print('耗时：{:3f}'.format((time.clock() - start)/60))
+#     
+# =============================================================================
 wb2.app.calculation = 'automatic'
 wb2.app.calculation = 'manual'
 wb2.save()
+print('耗时：{:3f}'.format((time.clock() - start)/60))

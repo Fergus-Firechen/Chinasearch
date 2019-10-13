@@ -12,8 +12,8 @@ import os
 import shutil
 import xlwings as xw
 
-date_file = '20190612'
-DATE = '20190619'  # 改1
+date_file = '20190626'
+DATE = '20190630'  # 改1
 
 # eg.规范命命：ave.workday&weekdayq4(2018 oct_dec)2019.01.02_v3
 # wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2018 Oct_Dec) ' + DATE_ + 'v1.xlsx')

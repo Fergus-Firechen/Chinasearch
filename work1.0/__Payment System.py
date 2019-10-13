@@ -12,9 +12,9 @@ import time, functools
 import pandas as pd
 import xlwings as xw
 
-path = [r'H:\SZ_数据\Input\P4P 消费报告2019.06...xlsx', 
+path = [r'H:\SZ_数据\Input\P4P 消费报告2019.10...xlsx', 
         r'D:\陈怀玉\工作\周工作\Payment System\Channel.csv',
-        r'D:\陈怀玉\工作\周工作\Payment System\系統-_201906_Master-5.xlsm']
+        r'D:\陈怀玉\工作\周工作\Payment System\系統-_201910_Master-1.xlsm']
 
 i = '19年已消费'
 
@@ -50,8 +50,9 @@ def main():
     # 数据清洗
     p4p = p4p.iloc[8:, :]
     p4p.fillna('-', inplace=True)
+    # 信誉成长值 = 二级行业
     master.rename(columns={'財務加款的端口':'端口', '客戶用户名':'用户名',
-                           '广告主URL':'URL', '行业分类':'Industry', 
+                           '广告主URL':'URL', '行业分类':'信誉成长值', 
                            '查賬財務郵箱地址':'财务做账区域'}, inplace=True)
     column = list(master.columns)
     master = master[['用户名', '付款方式']]

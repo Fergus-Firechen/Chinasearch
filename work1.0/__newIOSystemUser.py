@@ -16,7 +16,7 @@ def mergeExcel():
     '''
     print('测试：\n1.默认昨日；')
     # 昨日icrm消费报告地址
-    date = datetime.datetime.strftime(datetime.datetime.today()-datetime.timedelta(2), '%Y%m%d')  # 昨日 默认1
+    date = datetime.datetime.strftime(datetime.datetime.today()-datetime.timedelta(1), '%Y%m%d')  # 昨日 默认1
     icrmPath = r'C:\Users\chen.huaiyu\Downloads\消费报告 ' + date + '_' + date + '.csv'
     # 数据读取
     ioSystem = pd.read_excel(r'H:\SZ_数据\Input\IO System.xlsx')  # 新申户
@@ -52,11 +52,11 @@ def mergeExcel():
     account2.loc[account2['端口'] == 'csa-cny-004', '付款方式'] = 'China Search (Asia) Limited'
     account2.loc[(account2['AM'] == 'Billy') | (account2['AM'] == 'Jessie') | 
             (account2['AM'] == 'Estelle') | (account2['AM'] == 'Jacqueline'), 'AM'] = 'Billy & Jacqueline & Estelle & Jessie'
-    account2.loc[account2['AM'] == 'Billy & Jacqueline & Estelle & Jessie', '操作'] = '吴景虹 & 卢雅洁 & 徐琳玲'
+    account2.loc[account2['AM'] == 'Billy & Jacqueline & Estelle & Jessie', '操作'] = '吴景虹 & 卢雅洁'
     account2.loc[(account2['AM'] == 'Kendi') | (account2['AM'] == 'Cindy') | (account2['AM'] == 'Olivia') |
             (account2['AM'] == 'Tibby') | (account2['AM'] == 'Bruce'), 'AM'] = 'Kendi & Cindy & Tibby & Bruce & Olivia'
-    account2.loc[account2['AM'] == 'Kendi & Cindy & Tibby & Bruce & Olivia', '操作'] = '董湘君 & 李燕 & 吴康养'
-    account2.loc[account2['AM'] == 'Stella', '操作'] = '董湘君 & 李燕 & 吴康养'
+    account2.loc[account2['AM'] == 'Kendi & Cindy & Tibby & Bruce & Olivia', '操作'] = '董湘君 & 徐琳玲'
+    account2.loc[account2['AM'] == 'Stella', '操作'] = '董湘君 & 徐琳玲'
     # 深圳
     account2.loc[account2['端口'] == 'cny', '端口'] = 'cny-004'
     account2.loc[account2['端口'] == 'cny-004', '查賬財務郵箱地址'] = 'Automation-SZ財務查賬'
@@ -81,7 +81,7 @@ def mergeExcel():
     sht.range('A' + str(Row)).value = account2[account2['端口'] != '-'].values
     sht.range('A' + str(Row)).color = (162, 163, 165)  # RGB
     wb.save()
-    wb.app.screen_updating = False
+    wb.app.screen_updating = True
     #wb.close()
     
 
