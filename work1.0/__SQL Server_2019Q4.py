@@ -161,7 +161,6 @@ sql = '''
 '''
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()
-print(len(item))
 sht = wb.sheets['P4P']
 sht['O2'].value = list(map(lambda x:list(x), item))
 print('Spending Forecast P4P User Count: %s' % sht['O1'].current_region.rows.count)
@@ -470,7 +469,6 @@ for sheet in ['P4P', 'NP', 'Infeeds']:
     sht = wb.sheets[sheet]
     time.sleep(5)
     sql0 = sql_test_temp.replace('20190402', DATE).replace('P4P', sheet)
-    print(sql0)
     cursor.execute(sql_exist)
     cursor.execute(sql0)
     sql1 = '''
@@ -482,7 +480,6 @@ for sheet in ['P4P', 'NP', 'Infeeds']:
         WHERE table_name='test_temp'
         '''
     title = [i[3] for i in cursor.execute(sql_).fetchall()]
-    print(title)
     ex_row = sht['A1'].current_region.rows.count
     print('写入数据：%s行；原表中:%s行' % (len(item), ex_row))
     Cnt_row = sht['A2'].current_region.rows.count

@@ -21,13 +21,13 @@ today = datetime.datetime.today()
 # 输入
 # 1.N:前1日=1；前2日=0；前3日=-1...依次类推
 # 
-N = 10  # 改2
+N = 14  # 改2
 # 修改 AVG.日期
 Yesterday = today-datetime.timedelta(N)
 
 # 直接引用邮件中文件
-wb1 = xw.Book(r'H:\SZ_数据\Input\P4P 消费报告2019.09...xlsx')
-#wb1 = xw.books(r'P4P 消费报告2019.08..')
+#wb1 = xw.Book(r'H:\SZ_数据\Input\P4P 消费报告2019.09...xlsx')
+wb1 = xw.books(r'P4P 消费报告2019.09.30')
 
 sht1 = wb1.sheets['P4P消费']
 sht20 = wb1.sheets['搜索点击消费']
@@ -155,22 +155,20 @@ co = 'ev'
 lu = 'ew'
 
 
+'''  均值 '''
+for i in [sht2, sht3, sht4]:
+    
 # =============================================================================
-# '''  均值 '''
-# for i in [sht2, sht3, sht4]:
-#     
-# # =============================================================================
-# #     # 月度总消费
-# #     i['MJ3'].value = 0
-# #     i['MK3'].value = 0
-# # =============================================================================
-#     i['MJ3'].formula = '=average(em3:en3,eq3:eu3)'  # 工；繁版；周三；改！
-#     i['MK3'].formula = '=average(eo3:ep3,ev3:ew3)'
-#     # '''
-#     i['MJ3:MK3'].api.AutoFill(i['MJ3:MK' + str(row201)].api, constants.AutoFillType.xlFillCopy)
-#     print('耗时：{:3f}'.format((time.clock() - start)/60))
-#     
+#     # 月度总消费
+#     i['MJ3'].value = 0
+#     i['MK3'].value = 0
 # =============================================================================
+    i['MJ3'].formula = '=average(en3,eu3:eq3,ex3)'  # 工；繁版；周三；改！
+    i['MK3'].formula = '=average(eo3:ep3,ev3:ew3)'
+    # '''
+    i['MJ3:MK3'].api.AutoFill(i['MJ3:MK' + str(row201)].api, constants.AutoFillType.xlFillCopy)
+    print('耗时：{:3f}'.format((time.clock() - start)/60))
+    
 wb2.app.calculation = 'automatic'
 wb2.app.calculation = 'manual'
 wb2.save()
