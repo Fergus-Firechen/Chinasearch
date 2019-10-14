@@ -5,7 +5,6 @@ Created on Mon Dec 24 10:19:36 2018
 @author: chen.huaiyu
 """
 
-
 '''   分割：准备  '''
 
 # 批量修改文件名
@@ -13,8 +12,8 @@ import os
 import shutil
 import xlwings as xw
 
-date_file = '20190415'
-DATE = '20190424'  # 改1
+date_file = '20190925'
+DATE = '20190930'  # 改1
 
 # eg.规范命命：ave.workday&weekdayq4(2018 oct_dec)2019.01.02_v3
 # wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2018 Oct_Dec) ' + DATE_ + 'v1.xlsx')
@@ -65,7 +64,7 @@ if os.path.exists(Target_input) == False:
 
 # 数据处理（2019.01.16
 DATE_ = DATE[:4] + '.' + DATE[4:6] + '.' + DATE[6:]
-wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ2(2019 Apr_Jun)' + DATE_ + '.xlsx')  # 改4
+wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ3(2019 Jul_Sep)' + DATE_ + '.xlsx')  # 改4
 sht2 = wb2.sheets['搜索']
 sht3 = wb2.sheets['其他新产品']
 sht4 = wb2.sheets['原生广告']
@@ -101,9 +100,9 @@ sht53 = wb5.sheets['Infeeds2']
 j1 = 'A'  # 搜索 & P4P
 j2 = 'BZ'
 j3 = 'CA'
-j4 = 'IN'
-j5 = 'IO'  # 2
-j6 = 'OU'
+j4 = 'IS'  # 
+j5 = 'IT'  # 2
+j6 = 'PA'  # 
 
 k1 = j3  # P4P1
 
@@ -178,9 +177,11 @@ l2['B'+str(rows_2//4+1)].value = i[j5+str(rows_2//4+1)+':'+j6+str(rows_2//2)].va
 l2['B'+str(rows_2//2+1)].value = i[j5+str(rows_2//2+1)+':'+j6+str(3*rows_2//4)].value
 l2['B'+str(3*rows_2//4+1)].value = i[j5+str(3*rows_2//4+1)+':'+j6+str(rows_2)].value
   
-wb3.save()
-wb4.save()
-wb5.save()
+# =============================================================================
+# wb3.save()
+# wb4.save()
+# wb5.save()
+# =============================================================================
 
 # 删除第二行
 input('\a表单检查：')

@@ -14,7 +14,7 @@ import xlwings as xw
 # import numpy as np
 import datetime, time
 from __MergeExcel import MergeIO
-from __DaytoDayRatio_v2 import nearly5Workdays
+from __DaytoDayRatio_v3 import nearly5Workdays
 from xlwings import constants
 
 
@@ -361,15 +361,17 @@ if __name__ == '__main__':
                            'format': format1})
     path.save()
     
-    wb_basic = xw.Book(r'H:\SZ_数据\基本信息拆解.xlsx')
-    sht = wb_basic.sheets['基本信息']
-    sht[0, 0].value = basic_BaiTong[['属性', 'BU', '区域', '销售', 'AM', '操作', '开户性质', '新旧客户', 
-               '端口', '用户名','财务做账区域', '资质归属地', '公司总部', 'Region',
-               'Industry', 'URL', '信誉成长值','channel', '客户', '网站名称', 
-               '广告主', '开户日期', '首次消费日', '收取年服务费时间', '下单方',
-               '账户每日消费预算', '今日账户状态', '主体资质到期日', '加V缴费到期日'
-               ]]
-    wb_basic.save()
+# =============================================================================
+#     wb_basic = xw.Book(r'H:\SZ_数据\基本信息拆解.xlsx')
+#     sht = wb_basic.sheets['基本信息']
+#     sht[0, 0].value = basic_BaiTong[['属性', 'BU', '区域', '销售', 'AM', '操作', '开户性质', '新旧客户', 
+#                '端口', '用户名','财务做账区域', '资质归属地', '公司总部', 'Region',
+#                'Industry', 'URL', '信誉成长值','channel', '客户', '网站名称', 
+#                '广告主', '开户日期', '首次消费日', '收取年服务费时间', '下单方',
+#                '账户每日消费预算', '今日账户状态', '主体资质到期日', '加V缴费到期日'
+#                ]]
+#     wb_basic.save()
+# =============================================================================
     print('输出完成。')
     
     
