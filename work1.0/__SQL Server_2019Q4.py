@@ -15,7 +15,7 @@ from xlwings import constants
 
 star = time.clock()
 
-DATE = '20191008'  # 改
+DATE = '20191015'  # 改
 target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE
 server_name = 'SZ-CS-0038LT\SQLEXPRESS'
 db_name = 'CSA_2019Q4'
@@ -468,7 +468,8 @@ sql_test_temp = '''
 for sheet in ['P4P', 'NP', 'Infeeds']:
     sht = wb.sheets[sheet]
     time.sleep(5)
-    sql0 = sql_test_temp.replace('20190402', DATE).replace('P4P', sheet)
+    sql0 = sql_test_temp.replace('20190402', DATE)
+    sql0 = sql0.replace('P4P', sheet)
     cursor.execute(sql_exist)
     cursor.execute(sql0)
     sql1 = '''
@@ -482,11 +483,16 @@ for sheet in ['P4P', 'NP', 'Infeeds']:
     title = [i[3] for i in cursor.execute(sql_).fetchall()]
     ex_row = sht['A1'].current_region.rows.count
     print('写入数据：%s行；原表中:%s行' % (len(item), ex_row))
-    Cnt_row = sht['A2'].current_region.rows.count
-    Cnt_col = sht['A2'].current_region.columns.count
-    sht[:Cnt_row, :Cnt_col].clear()
+    sht[:, :].clear()
     sht['A1'].value = title
-    sht['A2'].value = list(map(list, item))
+    data = list(map(list, item))
+    
+    # test
+    import pandas as pd
+    df = pd.DataFrame(data, columns=title)
+    
+    
+    sht['A2'].options(expend='table').value = df.values
 wb.app.calculation = 'automatic'
 wb.save()
 wb.close()
@@ -605,7 +611,7 @@ sht['A3'].value = list(map(list, item))
 # NP
 cursor.execute(sql.replace('P4P_20190402', 'NP_'+DATE))
 item = cursor.fetchall()
-sht['A22'].value = list(map(list, item))
+sht['A23'].value = list(map(list, item))
 # Infeeds
 # sql
 sql = '''
@@ -624,7 +630,7 @@ order by a.NB, a.销售
 '''
 cursor.execute(sql.replace('Infeeds_20190522', 'Infeeds_'+DATE))
 item = cursor.fetchall()
-sht['A41'].value = list(map(list, item))
+sht['A43'].value = list(map(list, item))
 
 wb.app.calculation = 'automatic'
 wb.save()

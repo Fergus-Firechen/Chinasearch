@@ -66,15 +66,26 @@ class Sqlserver(object):
             col.append('金额')
             
             # 获取表内容
-            sql = '''
-            select a.*, b.金额
-            from [Account Management].[dbo].basicInfo a
-            left join 
-            (select * from [Account Management].[dbo].消费 
-            where 类别=%s and 日期=%s ) b
-            on a.用户名 = b.用户名
-            order by Id
-            '''
+            if obj == '现金':
+                sql = '''
+                    select a.*, b.金额
+                    from [Account Management].[dbo].basicInfo a
+                    left join 
+                    (select * from [Account Management].[dbo].现金
+                    where 类别=%s and 日期=%s ) b
+                    on a.用户名 = b.用户名
+                    order by Id
+                    '''
+            else:
+                sql = '''
+                select a.*, b.金额
+                from [Account Management].[dbo].basicInfo a
+                left join 
+                (select * from [Account Management].[dbo].消费
+                where 类别=%s and 日期=%s ) b
+                on a.用户名 = b.用户名
+                order by Id
+                '''
             data = engine.execute(sql, (category, date)).fetchall()
             
             # 返回DataFrame
@@ -94,7 +105,10 @@ class Excel(object):
         ''' Excel路径生成
         '''
         date_str = datetime.strptime(self._date, '%Y%m%d').strftime('%Y.%m..')
-        return self.path + date_str + '.xlsx'
+        if obj == '现金':
+            return self.path + date_str + 'cash.xlsx'
+        else:
+            return self.path + date_str + '.xlsx'
     
     def toExcel(self, df, sht):
         ''' 写入
@@ -136,29 +150,34 @@ class Excel(object):
     def dailyRatio(self, sht, dateStr):
         '''日环比；不计节假日
         '''
-        date = datetime.strptime(dateStr, '%Y%m%d')
-        if date.weekday() == 6:  # 周日(1)
-            date1 = date - timedelta(2)
-            date2 = date - timedelta(3)
-        elif date.weekday() == 5:  # 周六(7)
-            date1 = date - timedelta(1)
-            date2 = date - timedelta(2)
-        elif date.weekday() == 0:  # 周一(2)
-            date1 = date
-            date2 = date - timedelta(3)
-        elif date.weekday() in [1, 2, 3, 4]:  # 周二、三、四、五(3,4,5,6)
-            date1 = date
-            date2 = date - timedelta(1)
-        # 赋值
-        sht[2, 2].value = '环比增长额\n%s日环比%s日' % (date1.day, date2.day)
-        cnt1 = sht['A3:AJ3'].value.index(date1)
-        cnt2 = sht['A3:AJ3'].value.index(date2)
-        for i in range(3, 19):
-            sht[i, 2].value = sht[i, cnt1].value - sht[i, cnt2].value  # 环比增长额
-            if sht[i, cnt2].value == 0:
-                sht[i, 3].value = 0
-            else:
-                sht[i, 3].value = sht[i, 2].value/sht[i, cnt2].value  # 环比增长率
+        try:
+            date = datetime.strptime(dateStr, '%Y%m%d')
+            if date.weekday() == 6:  # 周日(1)
+                date1 = date - timedelta(2)
+                date2 = date - timedelta(3)
+            elif date.weekday() == 5:  # 周六(7)
+                date1 = date - timedelta(1)
+                date2 = date - timedelta(2)
+            elif date.weekday() == 0:  # 周一(2)
+                date1 = date
+                date2 = date - timedelta(3)
+            elif date.weekday() in [1, 2, 3, 4]:  # 周二、三、四、五(3,4,5,6)
+                date1 = date
+                date2 = date - timedelta(1)
+            # 赋值
+            sht[2, 2].value = '环比增长额\n%s日环比%s日' % (date1.day, date2.day)
+            cnt1 = sht['A3:AJ3'].value.index(date1)
+            cnt2 = sht['A3:AJ3'].value.index(date2)
+            for i in range(3, 19):
+                sht[i, 2].value = sht[i, cnt1].value - sht[i, cnt2].value  # 环比增长额
+                if sht[i, cnt2].value == 0:
+                    sht[i, 3].value = 0
+                else:
+                    sht[i, 3].value = sht[i, 2].value/sht[i, cnt2].value  # 环比增长率
+        except Exception as e:
+            print('5 日环比异常：%s', e)
+        else:
+            print('5 日环比')
 
 def main(dateStr):
     # 实例化
@@ -180,12 +199,13 @@ def main(dateStr):
     wb.app.calculation = 'automatic'
     wb.app.calculation = 'manual'
     # 每日消费走势
-    sht = wb.sheets['每日消费走势']
-    ex.dailyRatio(sht, dateStr)
-    # 保存
-    wb.save()
-    # wb.close()
-    print('\a程序结束')
+    if periods == 1:
+        sht = wb.sheets['每日消费走势']
+        ex.dailyRatio(sht, dateStr)
+        # 保存
+        wb.save()
+        # wb.close()
+        print('\a程序结束')
     
     
 if __name__ == '__main__':
@@ -194,6 +214,10 @@ if __name__ == '__main__':
     star = time.perf_counter()
     start = input('输入起始日期(20190101)：')
     periods = eval(input('输入持续日期数(1,2,...,n)：'))
+    obj = input('消费/现金?,(默认消费)：')
+    if obj == '':
+        obj = '消费'
+        print(obj)
     # 输入参数检查
     if datetime.strptime(start, '%Y%m%d') and isinstance(periods, int):
         print(start, periods)
@@ -201,6 +225,7 @@ if __name__ == '__main__':
         for i in dateStr:
             print(i)
             main(dateStr=i.strftime('%Y%m%d'))
+            periods -= 1
         stop = time.perf_counter()
         print('\a耗时：%.3f min' % ((stop - star)/60))
     pass

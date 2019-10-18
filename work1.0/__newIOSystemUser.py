@@ -5,10 +5,51 @@ Created on Wed Sep 26 15:19:14 2018
 # 2.
 @author: chen.huaiyu
 """
-
-import time, datetime
+import os
+import time
+import datetime
+import configparser
 import pandas as pd
-    
+from sqlalchemy import create_engine
+
+
+def connectDB():
+    def login():
+        CONF = r'C:\Users\chen.huaiyu\Chinasearch\c.s.conf'
+        conf = configparser.ConfigParser()
+        if os.path.exists(CONF):
+            conf.read(CONF)
+            host = conf.get('SQL Server', 'ip')
+            port = conf.get('SQL Server', 'port')
+            dbname = conf.get('SQL Server', 'dbname')   
+            return host, port, dbname
+    try:
+        ss = "mssql+pymssql://@%s:%s/%s"
+        engine = create_engine(ss % login())
+    except Exception as e:
+        print('Login failed %s' % e)
+    else:
+        print('Successful')
+        return engine
+
+engine = connectDB()
+
+
+def col_name():
+    sql = ''' SELECT * 
+        FROM information_schema.columns 
+        WHERE table_name='开户申请表'
+        '''
+    col = [i[3] for i in engine.execute(sql).fetchall()]
+    return col
+
+def data():
+    sql = ''' SELECT *
+        FROM 开户申请表
+        '''
+    dt = engine.execute(sql).fetchall()
+    return dt
+
 def mergeExcel():
     '''
     1.
@@ -20,10 +61,13 @@ def mergeExcel():
     icrmPath = r'C:\Users\chen.huaiyu\Downloads\消费报告 ' + date + '_' + date + '.csv'
     # 数据读取
     ioSystem = pd.read_excel(r'H:\SZ_数据\Input\IO System.xlsx')  # 新申户
+    
+    
     # 去重
     ioSystem.drop_duplicates('用户名')
     icrm = pd.read_csv(icrmPath, encoding='gbk', engine='python')  # 前日icrm
-    account = pd.read_excel(r'H:\SZ_数据\Input\开户进度总表.xlsx')  # 开户进度总表
+    #account = pd.read_excel(r'H:\SZ_数据\Input\开户进度总表.xlsx')  # 开户进度总表
+    account = pd.DataFrame(data(), columns=col_name())
     
     # 合并——新申户&icrm，提取网站名称、网站URl
     icrm.set_index('账户名称', drop=True, inplace=True)
@@ -33,7 +77,7 @@ def mergeExcel():
     
     # &开户进度总表——合并
     account.set_index('用户名', drop=True, inplace=True)
-    account.drop(['客户', 'Region', 'channel'], axis=1, inplace=True)
+    account.drop(['客户', 'Region', '渠道'], axis=1, inplace=True)
     account1 = pd.merge(icrmIO1, account, how='left', left_index=True, right_index=True, sort=False)
     account1.reset_index(inplace=True)
     account1.rename(columns={'index': '用户名'}, inplace=True)

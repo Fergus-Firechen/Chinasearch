@@ -279,7 +279,7 @@ def new_b(n):
         print('Tips:Py对大小写敏感，旧广告主&新广告主=非')
         lis5 = []
         for i in df_new['广告主'].tolist():
-            if i in df_b['广告主'].tolist():
+            if i in df_b['广告主'].tolist():       
                 df_new.loc[df_new['广告主'] == i, '新旧客户'] = 'EB'
             else:
                 if i in lis5:
@@ -329,12 +329,61 @@ def new_b(n):
             after_a_year(df_date, date, '开户日期')
             df_b.loc[df_b['用户名'].isin(df_date['用户名'].tolist()), 
                      date] = df_date[date].apply(lambda x:str(x)).values
-        
     else:
         print('无新消户')
     # 结束,更新DB
-    initBasicInfo2(df_b).to_sql('basicInfo', con=engine, if_exists='replace', 
-                                  index=False, chunksize=100)
+    df_b = initBasicInfo2(df_b)
+    new_b = df_new['用户名'].tolist()
+    if len(new_b) > 0:
+        df_new = df_b[df_b['用户名'].isin(new_b)]
+        df_new.to_sql('basicInfo', con=engine, 
+                      if_exists='append', index=False)
+
+
+@cost_time
+def update_basicInfo():
+    '基本信息更新'
+    lis1 = ['URL', '加V缴费到期日', '端口', '网站名称', 
+            '主体资质到期日', '今日账户状态', '开户日期', '用户名']
+    # 3.0 筛选，仅对lis1中在icrm发生了更新了的账户
+    # 3.1 筛选前更新全部数据  筛选后预估<<1000
+    # 3.2 --重新从数据库中读取数据，并以更新列完全去重； --后以用户名保留首位去重
+    # 3.3 -- 放弃：许多户除用户名其它都一样  -- 另数据量不大，消耗资源有限
+    #
+    df_db = df('basicInfo')
+    df1 = df_b.append(df_db, sort=False)
+    df1.drop_duplicates(lis1, keep=False, inplace=True)
+    df1.drop_duplicates('用户名', keep='first', inplace=True)
+    # 开始更新
+    print('更新账户：%s个'.format(df1.shape))
+    try:
+        for i in df1[lis1].values:
+            sql_ = ''' UPDATE basicInfo
+                SET URL='{}', 加V缴费到期日='{}', 端口='{}', 网站名称='{}', 主体资质到期日='{}', 今日账户状态='{}', 开户日期='{}' 
+                WHERE 用户名='{}'
+                '''
+            # 1. py中NaT & sql中NULL不兼容
+            if isinstance(i[1], type(pd.NaT)):
+                i[1] = 'NULL'
+                sql_ = sql_.replace("加V缴费到期日='{}'", "加V缴费到期日={}")
+            if isinstance(i[4], type(pd.NaT)):
+                i[4] = 'NULL'
+                sql_ = sql_.replace("主体资质到期日='{}'", "主体资质到期日={}")
+            if isinstance(i[6], type(pd.NaT)):
+                i[6] = 'NULL'
+                sql_ = sql_.replace("开户日期='{}'", "开户日期={}")
+            # 2.0. py中，可以使用双引号"&单引号'之间的嵌套
+            # 2.1. sql中，'一般均用两个''替代
+            #
+            if isinstance(i[3], str) and "'" in i[3]:
+                    i[3] = i[3].replace("'", "''")
+            sql = sql_.format(i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7])
+            engine.execute(sql)
+    except Exception as e:
+        print(e)
+    else:
+        print('The update is normal.')
+
 
 def after_a_year(df, col1, col2):
     '+ 1年'
@@ -416,4 +465,5 @@ if __name__ == '__main__':
     read_file(n)
     new_b(n)
     update_first_spend_date()
+    update_basicInfo()
     pass

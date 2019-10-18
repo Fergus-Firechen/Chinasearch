@@ -21,13 +21,13 @@ today = datetime.datetime.today()
 # 输入
 # 1.N:前1日=1；前2日=0；前3日=-1...依次类推
 # 
-N = 14  # 改2
+N = 1  # 改2
 # 修改 AVG.日期
 Yesterday = today-datetime.timedelta(N)
 
 # 直接引用邮件中文件
 #wb1 = xw.Book(r'H:\SZ_数据\Input\P4P 消费报告2019.09...xlsx')
-wb1 = xw.books(r'P4P 消费报告2019.09.30')
+wb1 = xw.books(r'P4P 消费报告2019.10.15')
 
 sht1 = wb1.sheets['P4P消费']
 sht20 = wb1.sheets['搜索点击消费']
@@ -67,7 +67,7 @@ range40 = sht40[9:row11, column11:column12 + 1]
 
 # 繁  # 改 1
 wb2 = xw.Book(
-        r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ3(2019 Jul_Sep)2019.09.30.xlsx')
+        r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2019 OCT to Nov )2019.10.15.xlsx')
 
 # 简 wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4- 2018.12.23(simplified)-v1.xlsx')
 # wb2 = xw.books('Ave.workday&weekdayQ4- 2018.12.23(simplified)')
@@ -76,6 +76,7 @@ sht2 = wb2.sheets['搜索']
 sht3 = wb2.sheets['其他新产品']
 sht4 = wb2.sheets['原生广告']
 sht5 = wb2.sheets['Date List']
+
 
 # 写入前总行数
 row200 = sht2[1, 0].current_region.rows.count - 1  # 写入前
@@ -93,6 +94,7 @@ sht4[2, 0].value = range10.value
 sht2[2, 0].color = (255, 255, 0)
 sht3[2, 0].color = (126, 126, 165)
 sht4[2, 0].color = (126, 126, 165)
+
 # 2.2 数据填充
 # 2.2.1 位置坐标
 row20 = 2
@@ -151,8 +153,8 @@ for i in [sht2, sht3, sht4]:
 # wb2.save()
 
 # 最近2日列
-co = 'ev'
-lu = 'ew'
+co = 'cb'
+lu = 'cc'
 
 
 '''  均值 '''
@@ -163,8 +165,8 @@ for i in [sht2, sht3, sht4]:
 #     i['MJ3'].value = 0
 #     i['MK3'].value = 0
 # =============================================================================
-    i['MJ3'].formula = '=average(en3,eu3:eq3,ex3)'  # 工；繁版；周三；改！
-    i['MK3'].formula = '=average(eo3:ep3,ev3:ew3)'
+    i['MN3'].formula = '=average(cc3:cb3,bv3:by3,bn3)'  # 工；繁版；周三；改！
+    i['MO3'].formula = '=average(bz3:ca3,bt3:bu3)'
     # '''
     i['MJ3:MK3'].api.AutoFill(i['MJ3:MK' + str(row201)].api, constants.AutoFillType.xlFillCopy)
     print('耗时：{:3f}'.format((time.clock() - start)/60))
