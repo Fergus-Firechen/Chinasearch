@@ -7,11 +7,15 @@ Created on Mon Mar 25 11:22:45 2019
 
 @author: chen.huaiyu
 """
+import os
+import time
+import functools
+import configparser
+import pandas as pd
+import xlwings as xw
 from datetime import datetime
 from sqlalchemy import create_engine
-import time, functools, os
-import pandas as pd
-import configparser
+
 
 
 class array(object):
@@ -34,7 +38,7 @@ class array(object):
         return date
     
     def field(self):
-        # 字段集
+        # 字段集 产品名+日期
         col = []
         for i in range(6):
             col.append(list(map(lambda x: self.print_col()[i] + self.target + x, self.date())))
@@ -93,25 +97,34 @@ def dfFromDB(tableName):
     return df
 
 @cost_time
-def read_file():
+def read_file(obj):
     global df1, df3  #df2, 
-    '==icrm 消费csv=='
+    '==icrm 消费/现金csv=='
     df1 = pd.read_csv(a.print_path(), engine='python', encoding='gbk')
     df1.rename(columns={'账户名称':'用户名'}, inplace=True)
     df1['用户名'] = df1['用户名'].astype(str)
     df1.drop(columns='账户ID', inplace=True)
     '==百通=='
+    wb = xw.Book(r'H:\SZ_数据\Input\每日百度消费.xlsx')
     sheet = 'P4P消费'+str(a.print_date().month)+'月'
-    df3 = pd.read_excel(r'H:\SZ_数据\Input\每日百度消费.xlsx', sheet_name=sheet).iloc[38:55,:]
+    sht = wb.sheets[sheet]
+    cnt = sht['A39'].current_region.rows.count - 2
+    df3 = pd.DataFrame(sht[38:38+cnt, :33].value)
+    #df3 = pd.read_excel(r'H:\SZ_数据\Input\每日百度消费.xlsx', sheet_name=sheet).iloc[38:cnt+38,:]
     '结构整理'
-    df3.iloc[0, 0] = '用户名'
-    df3.columns = df3.iloc[0, :].tolist()
-    df3.drop(index=[38], inplace=True)
+    df3.iloc[1, 0] = '用户名'
+    df3.columns = df3.iloc[1, :].tolist()
+    df3.drop(index=[0, 1], inplace=True)
     df3.drop(columns='总计', inplace=True)
     df3.set_index('用户名', drop=True, inplace=True)
+    df3.dropna(inplace=True, how='all', axis=1)
     df3.columns = [i.strftime('%Y%m%d') for i in df3.columns]
     df3 = df3.loc[:, a.date()[0]:a.date()[-1]]
     df3.columns = a.field()[4]
+    if obj == '现金':
+        df3 = df3.applymap(lambda x: x/1.22)
+    else:
+        pass
     
 def upload_ka(start, stop):
     
@@ -196,6 +209,12 @@ def connectDB():
         print('连接成功')
         return engine
 
+def get_latest(folder):
+    '获取文件夹中最新文件  暂时无用'
+    files = [os.path.join(folder, f) for f in os.listdir(folder)]
+    files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    return files[0]
+
 if __name__ == '__main__':
     try:
         # 连接 DB
@@ -219,7 +238,7 @@ if __name__ == '__main__':
     else:
         print('SQL Server连接成功')
         run()
-        read_file()
+        read_file(a.target)
         main()
         upload_ka(star, stop)
     finally:
