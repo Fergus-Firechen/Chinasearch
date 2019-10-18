@@ -180,7 +180,6 @@ def dataCleaning(dic):
     '''对邮件抓取到的数据进行清洗
     '''
     df1 = pd.DataFrame(dic)
-    print(df1)
     # '军朗 填充'
     try:
         if df1.loc[1, '端口'] in('baidu-Junlang', 'csa-baidu-ogilvy', 'baidu-ogilvy'):
