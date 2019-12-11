@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Created on Tue Mar 19 20:10:33 2019
 
@@ -337,8 +337,7 @@ def new_b(n):
     if len(new_b) > 0:
         df_new = df_b[df_b['用户名'].isin(new_b)]
         df_new.to_sql('basicInfo', con=engine, 
-                      if_exists='append', index=False)
-
+	                      if_exists='append', index=False)
 
 @cost_time
 def update_basicInfo():
@@ -355,7 +354,7 @@ def update_basicInfo():
     df1.drop_duplicates(lis1, keep=False, inplace=True)
     df1.drop_duplicates('用户名', keep='first', inplace=True)
     # 开始更新
-    print('更新账户：%s个'.format(df1.shape))
+    print('更新账户：{}个'.format(df1.shape[0]))
     try:
         for i in df1[lis1].values:
             sql_ = ''' UPDATE basicInfo
@@ -447,7 +446,7 @@ def connectDB():
         engine = create_engine(
                 'mssql+pymssql://@%s:%s/%s' % login())
     except Exception as e:
-        print('连接成功 %s' % e)
+        raise Exception('连接成功 %s' % e)
     else:
         print('连接成功')
         return engine
@@ -461,7 +460,11 @@ if __name__ == '__main__':
     #'保留测试账户，进行测试'  --已
     run()  # 测试
     # initBasicInfo()  # 初始化；从桌面读入基本信息，整理
-    n = 1  # 昨日=1
+    n = input('默认昨日(Enter)')  # 昨日=1
+    if n == '':
+    	n = 1
+    else:
+    	n = eval(n)
     read_file(n)
     new_b(n)
     update_first_spend_date()
