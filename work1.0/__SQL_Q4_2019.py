@@ -12,8 +12,8 @@ import os
 import shutil
 import xlwings as xw
 
-date_file = '20191008'
-DATE = '20191015'  # 改1
+date_file = '20191126'
+DATE = '20191203'  # 改1
 
 # eg.规范命命：ave.workday&weekdayq4(2018 oct_dec)2019.01.02_v3
 # wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2018 Oct_Dec) ' + DATE_ + 'v1.xlsx')
@@ -72,7 +72,7 @@ if os.path.exists(Target_input) == False:
 
 # 数据处理（2019.01.16
 DATE_ = DATE[:4] + '.' + DATE[4:6] + '.' + DATE[6:]
-wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2019 OCT to Nov )' + DATE_ + '.xlsx')  # 改4
+wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2019 OCT to Dec)' + DATE_ + '.xlsx')  # 改4
 sht2 = wb2.sheets['搜索']
 sht3 = wb2.sheets['其他新产品']
 sht4 = wb2.sheets['原生广告']

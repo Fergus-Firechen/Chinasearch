@@ -12,10 +12,18 @@ import os
 import time
 import xlwings as xw
 from xlwings import constants
+from datetime import date, timedelta
 
 star = time.clock()
 
-DATE = '20191015'  # 改
+def dat():
+	n = input('Default Yesterday?：')
+	if n == '':
+		n = '1'
+	return (date.today() - timedelta(eval(n))).strftime('%Y%m%d')  # 改 
+
+DATE = dat()
+print('DATE = {}'.format(DATE))
 target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE
 server_name = 'SZ-CS-0038LT\SQLEXPRESS'
 db_name = 'CSA_2019Q4'
@@ -32,6 +40,8 @@ cursor = cnxn.cursor()
 
 # Merge P4P & NP & Infeeds
 cursor.execute('''
+                if object_id('P4P_20190402') is not null
+                    drop table P4P_20190402
                 select a.*, b.* into P4P_20190402 from P4P_20190402_1 a inner join P4P_20190402_2 b on a.用户名=b.用户名1
                 alter table P4P_20190402 drop column 用户名1
                 
@@ -42,6 +52,8 @@ cursor.execute('''
                 
                 
                 
+                if object_id('NP_20190402') is not null
+                    drop table NP_20190402
                 select a.*, b.* into NP_20190402 from NP_20190402_1 a inner join NP_20190402_2 b on a.用户名=b.用户名1
                 alter table NP_20190402 drop column 用户名1
                 
@@ -52,6 +64,8 @@ cursor.execute('''
                 
                 
                 
+                if object_id('Infeeds_20190402') is not null
+                    drop table Infeeds_20190402
                 select a.*, b.* into Infeeds_20190402 from Infeeds_20190402_1 a inner join Infeeds_20190402_2 b on a.用户名=b.用户名1
                 alter table Infeeds_20190402 drop column 用户名1
                 
@@ -70,15 +84,16 @@ cnxn.commit()
 print('注1：\nSpending Forecast')
 wb = xw.Book(target+'\\'+os.listdir(target)[0])
 sql = '''
-    select 端口, sum([2019Jan]) as Jan_19,
+    select 端口, 
+    sum([2019Jan]) as Jan_19,
     sum([2019Feb]) as Feb_19,
     sum([2019Mar]) as Mar_19,
     sum([2019Apr]) as Apr_19,
     sum([2019May]) as May_19,
     sum([2019Jun]) as Jun_19,
-    sum([Oct Spending Forecast]) as Oct_19,
-    sum([Nov Spending Forecast]) as Nov_19,
-    sum([Dec Spending Forecast]) as Dec_19,
+    sum([2019Jul]) as Jul_19,
+    sum([2019Aug]) as Aug_19,
+    sum([2019Sep]) as Sep_19,
     sum([Oct Spending Forecast]) as Oct_19,
     sum([Nov Spending Forecast]) as Nov_19,
     sum([Dec Spending Forecast]) as Dec_19
@@ -148,9 +163,9 @@ sql = '''
     sum([2019Apr]) as Apr_19,
     sum([2019May]) as May_19,
     sum([2019Jun]) as Jun_19,
-    sum([Oct Spending Forecast]) as Oct_19,
-    sum([Nov Spending Forecast]) as Nov_19,
-    sum([Dec Spending Forecast]) as Dec_19,
+    sum([2019Jul]) as Jul_19,
+    sum([2019Aug]) as Aug_19,
+    sum([2019Sep]) as Sep_19,
     sum([Oct Spending Forecast]) as Oct_19,
     sum([Nov Spending Forecast]) as Nov_19,
     sum([Dec Spending Forecast]) as Dec_19
@@ -214,22 +229,22 @@ if rows100 < rows101:  # 如用户名有新增；则向下填充公式
 # Pivot Table (区域)
 # P4P
 sql = '''
-select 区域, sum([2019Jan]) as Jan_19,
-sum([2019Feb]) as Feb_19,
-sum([2019Mar]) as Mar_19,
-sum([2019Apr]) as Apr_19,
-sum([2019May]) as May_19,
-sum([2019Jun]) as Jun_19,
-sum([Oct Spending Forecast]) as Oct_19,
-sum([Nov Spending Forecast]) as Nov_19,
-sum([Dec Spending Forecast]) as Dec_19,
-sum([Oct Spending Forecast]) as Oct_19,
-sum([Nov Spending Forecast]) as Nov_19,
-sum([Dec Spending Forecast]) as Dec_19
-from P4P_20190402
-where 端口 not like '%wrong%' and 区域 <> '-'
-group by 区域
-order by 区域
+    select 区域, sum([2019Jan]) as Jan_19,
+    sum([2019Feb]) as Feb_19,
+    sum([2019Mar]) as Mar_19,
+    sum([2019Apr]) as Apr_19,
+    sum([2019May]) as May_19,
+    sum([2019Jun]) as Jun_19,
+    sum([2019Jul]) as Jul_19,
+    sum([2019Aug]) as Aug_19,
+    sum([2019Sep]) as Sep_19,
+    sum([Oct Spending Forecast]) as Oct_19,
+    sum([Nov Spending Forecast]) as Nov_19,
+    sum([Dec Spending Forecast]) as Dec_19
+    from P4P_20190402
+    where 端口 not like '%wrong%' and 区域 <> '-'
+    group by 区域
+    order by 区域
 '''
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()
@@ -254,19 +269,24 @@ print('注2：\nSpending Forecast _v1')
 wb = xw.Book(target+'\\'+os.listdir(target)[1])
 sht = wb.sheets['P4P']
 sql = '''
-select AM, 端口, 用户名, 广告主, sum([Ave# Daily Workday]) as [avg_daily_workday], sum([Ave# Daily Holiday]) as [avg_daily_holiday],
-sum([2019Jan]) as Jan_19,
-sum([2019Feb]) as Feb_19,
-sum([2019Mar]) as Mar_19,
-sum([2019Apr]) as Apr_19,
-sum([2019May]) as May_19,
-sum([2019Jun]) as Jun_19,
-sum([Oct Spending Forecast]) as Oct_19,
-sum([Nov Spending Forecast]) as Nov_19,
-sum([Dec Spending Forecast]) as Dec_19,
-sum([Oct Spending Forecast]) as Oct_19,
-sum([Nov Spending Forecast]) as Nov_19,
-sum([Dec Spending Forecast]) as Dec_19
+select AM
+    , 端口
+    , 用户名
+    , 广告主
+    , sum([Ave# Daily Workday]) as [avg_daily_workday]
+    , sum([Ave# Daily Holiday]) as [avg_daily_holiday]
+    , sum([2019Jan]) as Jan_19
+    , sum([2019Feb]) as Feb_19
+    , sum([2019Mar]) as Mar_19
+    , sum([2019Apr]) as Apr_19
+    , sum([2019May]) as May_19
+    , sum([2019Jun]) as Jun_19
+    , sum([2019Jul]) as Jul_19
+    , sum([2019Aug]) as Aug_19
+    , sum([2019Sep]) as Sep_19
+    , sum([Oct Spending Forecast]) as Oct_19
+    , sum([Nov Spending Forecast]) as Nov_19
+    , sum([Dec Spending Forecast]) as Dec_19
 from P4P_20190402
 where 端口 not like '%wrong%'
 group by AM, 端口, 用户名, 广告主
@@ -377,15 +397,20 @@ wb = xw.Book(target+'\\'+os.listdir(target)[5])
 sht = wb.sheets['AM']
 # P4P
 sql = '''
-select a.AM, sum([Q4 Total Spending Forecast]) as Q4_Total_Spending_Forecast, 
-sum([Oct_FX GAIN(RMB)]) as Oct_FX_Gain_RMB, sum([Nov_FX GAIN(RMB)]) as Nov_FX_Gain_RMB, sum([Dec_FX GAIN(RMB)]) as Dec_FX_Gain_RMB,
-sum([FX GAIN(RMB)]) as FX_Gain_RMB, sum([FX GAIN(RMB)])/0.18 as FX_Gain_Spending_RMB, 
-sum([2019Oct]+[2019Nov]+[2019Dec]) as Q4_Total_Spending_QTD,
-sum([QTD FX GAIN (RMB)]) as QTD_FX_Gain_RMB, sum([QTD FX GAIN (RMB)])/0.18 as QTD_FX_Gain_Spending_RMB
-from P4P_20190402 a inner join [CSA_AM] b on a.AM=b.AM
-where 端口 not like '%wrong%'
-group by b.AM_Group, a.AM
-order by b.AM_Group, a.AM
+    select a.AM
+        , sum([Q4 Total Spending Forecast]) as Q4_Total_Spending_Forecast
+        , sum([Oct_FX GAIN(RMB)]) as Oct_FX_Gain_RMB
+        , sum([Nov_FX GAIN(RMB)]) as Nov_FX_Gain_RMB
+        , sum([Dec_FX GAIN(RMB)]) as Dec_FX_Gain_RMB
+        , sum([FX GAIN(RMB)]) as FX_Gain_RMB
+        , sum([FX GAIN(RMB)])/0.18 as FX_Gain_Spending_RMB
+        , sum([2019Oct]+[2019Nov]+[2019Dec]) as Q4_Total_Spending_QTD
+        , sum([QTD FX GAIN (RMB)]) as QTD_FX_Gain_RMB
+        , sum([QTD FX GAIN (RMB)])/0.18 as QTD_FX_Gain_Spending_RMB
+    from P4P_20190402 a inner join [CSA_AM] b on a.AM=b.AM
+    where 端口 not like '%wrong%'
+    group by b.AM_Group, a.AM
+    order by b.AM_Group, a.AM
 '''
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()
@@ -421,13 +446,18 @@ sht['A37'].value = list(map(list, item))
 # P4P
 sht = wb.sheets['Sales']
 sql = '''
-select a.NB, a.销售, sum([Q4 Eligible Spending Forecast]) as Q4_Eligible_Spending_Forecast, sum([FX GAIN(RMB)_Sales]) as FX_Gain_RMB_Sales,
-sum([FX GAIN(RMB)_Sales])/0.18 as FX_Gain_Spending_RMB_Sales, sum([Eligible Spending(QTD)]) as Q4_Eligible_Spending_QTD, 
-sum([QTD FX GAIN (RMB)_Sales]) as QTD_FX_Gain_RMB_Sales, sum([QTD FX GAIN (RMB)_Sales])/0.18 as QTD_FX_Gain_Spending_RMB_Sales
-from P4P_20190402 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
-where 端口 not like '%wrong%' and NB <> '2017&2018EB'
-group by a.NB, a.销售
-order by a.NB, a.销售
+    select a.NB
+        , a.销售
+        , sum([Q4 Eligible Spending Forecast]) as Q4_Eligible_Spending_Forecast
+        , sum([FX GAIN(RMB)_Sales]) as FX_Gain_RMB_Sales
+        , sum([FX GAIN(RMB)_Sales])/0.18 as FX_Gain_Spending_RMB_Sales
+        , sum([Eligible Spending(QTD)]) as Q4_Eligible_Spending_QTD
+        , sum([QTD FX GAIN (RMB)_Sales]) as QTD_FX_Gain_RMB_Sales
+        , sum([QTD FX GAIN (RMB)_Sales])/0.18 as QTD_FX_Gain_Spending_RMB_Sales
+    from P4P_20190402 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
+    where 端口 not like '%wrong%' and NB <> '2017&2018EB'
+    group by a.NB, a.销售
+    order by a.NB, a.销售
        '''
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()
@@ -438,11 +468,11 @@ sht['A3'].value = list(map(list, item))
 # NP
 cursor.execute(sql.replace('P4P_20190402', 'NP_'+DATE))
 item = cursor.fetchall()
-sht['A25'].value = list(map(list, item))
+sht['A26'].value = list(map(list, item))
 # Infeeds
 cursor.execute(sql.replace('P4P_20190402', 'Infeeds_'+DATE))
 item = cursor.fetchall()
-sht['A47'].value = list(map(list, item))
+sht['A49'].value = list(map(list, item))
 
 wb.app.calculation = 'automatic'
 wb.save()
@@ -556,12 +586,13 @@ wb.close()
 wb = xw.Book(target+'\\'+os.listdir(target)[7])
 sht = wb.sheets['Sheet1']
 sql = '''
-select a.销售, sum([Q4 Eligible Spending Forecast]) as Q4_Eligible_Spending_Forecast, 
-sum([Q4 Eligible GP Forecast]) as Q4_Eligible_GP_Forecast
-from P4P_20190402 a inner join [CSA_Sales] b on a.销售=b.Sales
-where 端口 not like '%wrong%' and a.NB='2019Q4'
-group by a.销售
-order by a.销售
+    select a.销售
+        , sum([Q4 Eligible Spending Forecast]) as Q4_Eligible_Spending_Forecast
+        , sum([Q4 Eligible GP Forecast]) as Q4_Eligible_GP_Forecast
+    from P4P_20190402 a inner join [CSA_Sales] b on a.销售=b.Sales
+    where 端口 not like '%wrong%' and a.NB='2019Q4'
+    group by a.销售
+    order by a.销售
     '''
 # P4P
 cursor.execute(sql.replace('20190402', DATE))
@@ -593,14 +624,20 @@ wb.close()
 wb = xw.Book(target+'\\'+os.listdir(target)[8])
 sht = wb.sheets[0]
 sql = '''
-select a.NB, a.销售, sum([Oct Eligible Spending]) as Oct_Eligible_Spending, sum([Nov Eligible Spending]) as Nov_Eligible_Spending, 
-sum([Dec Eligible Spending]) as Dec_Eligible_Spending, sum([Oct Eligible Spending Forecast]) as Oct_Eligible_Spending_Forecast, 
-sum([Nov Eligible Spending Forecast]) as Nov_Eligible_Spending_Forecast, sum([Dec Eligible Spending Forecast]) as Dec_Eligible_Spending_Forecast, 
-sum([Q4 Eligible Spending Forecast]) as Q4_Eligible_Spending_Forecast, sum([Eligible Spending(QTD)]) as Q4_Eligible_Spending_QTD
-from P4P_20190402 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
-where 端口 not like '%wrong%' and a.NB not like '2017&2018EB'
-group by a.NB, a.销售
-order by a.NB, a.销售
+    select a.NB
+        , a.销售
+        , sum([Oct Eligible Spending]) as Oct_Eligible_Spending
+        , sum([Nov Eligible Spending]) as Nov_Eligible_Spending
+        , sum([Dec Eligible Spending]) as Dec_Eligible_Spending
+        , sum([Oct Eligible Spending Forecast]) as Oct_Eligible_Spending_Forecast
+        , sum([Nov Eligible Spending Forecast]) as Nov_Eligible_Spending_Forecast
+        , sum([Dec Eligible Spending Forecast]) as Dec_Eligible_Spending_Forecast
+        , sum([Q4 Eligible Spending Forecast]) as Q4_Eligible_Spending_Forecast
+        , sum([Eligible Spending(QTD)]) as Q4_Eligible_Spending_QTD
+    from P4P_20190402 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
+    where 端口 not like '%wrong%' and a.NB not like '2017&2018EB'
+    group by a.NB, a.销售
+    order by a.NB, a.销售
     '''
 # P4P
 cursor.execute(sql.replace('20190402', DATE))
@@ -615,18 +652,20 @@ sht['A23'].value = list(map(list, item))
 # Infeeds
 # sql
 sql = '''
-select a.NB, a.销售, sum([Oct Eligible Spending]+[Oct Eligible Spending]*0.0789313904068002/0.18) as Oct_Eligible_Spending, 
-sum([Nov Eligible Spending]+[Nov Eligible Spending]*0.0789313904068002/0.18) as Nov_Eligible_Spending, 
-sum([Dec Eligible Spending]+[Dec Eligible Spending]*0.0789313904068002/0.18) as Dec_Eligible_Spending, 
-sum([Oct Eligible Spending Forecast]+[Oct Eligible Spending Forecast]*0.0789313904068002/0.18) as Oct_Eligible_Spending_Forecast, 
-sum([Nov Eligible Spending Forecast]+[Nov Eligible Spending Forecast]*0.0789313904068002/0.18) as Nov_Eligible_Spending_Forecast, 
-sum([Dec Eligible Spending Forecast]+[Dec Eligible Spending Forecast]*0.0789313904068002/0.18) as Dec_Eligible_Spending_Forecast, 
-sum([Q4 Eligible Spending Forecast]+[Q4 Eligible Spending Forecast]*0.0789313904068002/0.18) as Q4_Eligible_Spending_Forecast, 
-sum([Eligible Spending(QTD)]+[Eligible Spending(QTD)]*0.0789313904068002/0.18) as Q4_Eligible_Spending_QTD
-from Infeeds_20190522 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
-where 端口 not like '%wrong%' and a.NB not like '2017&2018EB'
-group by a.NB, a.销售
-order by a.NB, a.销售
+    select a.NB
+        , a.销售
+        , sum([Oct Eligible Spending]+[Oct Eligible Spending]*0.0789313904068002/0.18) as Oct_Eligible_Spending, 
+        sum([Nov Eligible Spending]+[Nov Eligible Spending]*0.0789313904068002/0.18) as Nov_Eligible_Spending, 
+        sum([Dec Eligible Spending]+[Dec Eligible Spending]*0.0789313904068002/0.18) as Dec_Eligible_Spending, 
+        sum([Oct Eligible Spending Forecast]+[Oct Eligible Spending Forecast]*0.0789313904068002/0.18) as Oct_Eligible_Spending_Forecast, 
+        sum([Nov Eligible Spending Forecast]+[Nov Eligible Spending Forecast]*0.0789313904068002/0.18) as Nov_Eligible_Spending_Forecast, 
+        sum([Dec Eligible Spending Forecast]+[Dec Eligible Spending Forecast]*0.0789313904068002/0.18) as Dec_Eligible_Spending_Forecast, 
+        sum([Q4 Eligible Spending Forecast]+[Q4 Eligible Spending Forecast]*0.0789313904068002/0.18) as Q4_Eligible_Spending_Forecast, 
+        sum([Eligible Spending(QTD)]+[Eligible Spending(QTD)]*0.0789313904068002/0.18) as Q4_Eligible_Spending_QTD
+    from Infeeds_20190522 a inner join [CSA_HK_Sales] b on a.销售=b.Sales
+    where 端口 not like '%wrong%' and a.NB not like '2017&2018EB'
+    group by a.NB, a.销售
+    order by a.NB, a.销售
 '''
 cursor.execute(sql.replace('Infeeds_20190522', 'Infeeds_'+DATE))
 item = cursor.fetchall()
@@ -642,14 +681,14 @@ wb.close()
 wb = xw.Book(target+'\\'+os.listdir(target)[2])
 sht = wb.sheets[0]
 sql = '''
-select b.AM_Region, b.AM_Group,b.AM, sum([Oct Spending Forecast]) as Oct_19,
-sum([Nov Spending Forecast]) as Nov_19,
-sum([Dec Spending Forecast]) as Dec_19,
-sum([Total Spending]) as Q4_Total_Spending_QTD
-from P4P_20190402 a inner join [CSA_AM] b on a.AM=b.AM
-where 端口 not like '%wrong%'
-group by b.AM_Region, b.AM_Group,b.AM
-order by b.AM_Region, b.AM_Group,b.AM
+    select b.AM_Region, b.AM_Group,b.AM, sum([Oct Spending Forecast]) as Oct_19,
+    sum([Nov Spending Forecast]) as Nov_19,
+    sum([Dec Spending Forecast]) as Dec_19,
+    sum([Total Spending]) as Q4_Total_Spending_QTD
+    from P4P_20190402 a inner join [CSA_AM] b on a.AM=b.AM
+    where 端口 not like '%wrong%'
+    group by b.AM_Region, b.AM_Group,b.AM
+    order by b.AM_Region, b.AM_Group,b.AM
     '''
 # P4P
 cursor.execute(sql.replace('20190402', DATE))
@@ -665,14 +704,14 @@ sht['A18'].value = list(map(list, item))
 # n1 = 0.03227055633443914
 # n2 = 0.0789313904068002
 sql = '''
-select b.AM_Region, b.AM_Group,b.AM, sum([Oct Spending Forecast])+sum([Oct Spending Forecast])*0.0789313904068002/0.18 as Oct_19,
-sum([Nov Spending Forecast])+sum([Nov Spending Forecast])*0.0789313904068002/0.18 as Nov_19,
-sum([Dec Spending Forecast])+sum([Dec Spending Forecast])*0.0789313904068002/0.18 as Dec_19,
-sum([Total Spending])+sum([Total Spending])*0.0789313904068002/0.18 as Q4_Total_Spending_QTD
-from Infeeds_20190402 a inner join [CSA_AM] b on a.AM=b.AM
-where 端口 not like '%wrong%'
-group by b.AM_Region, b.AM_Group,b.AM
-order by b.AM_Region, b.AM_Group,b.AM
+    select b.AM_Region, b.AM_Group,b.AM, sum([Oct Spending Forecast])+sum([Oct Spending Forecast])*0.0789313904068002/0.18 as Oct_19,
+    sum([Nov Spending Forecast])+sum([Nov Spending Forecast])*0.0789313904068002/0.18 as Nov_19,
+    sum([Dec Spending Forecast])+sum([Dec Spending Forecast])*0.0789313904068002/0.18 as Dec_19,
+    sum([Total Spending])+sum([Total Spending])*0.0789313904068002/0.18 as Q4_Total_Spending_QTD
+    from Infeeds_20190402 a inner join [CSA_AM] b on a.AM=b.AM
+    where 端口 not like '%wrong%'
+    group by b.AM_Region, b.AM_Group,b.AM
+    order by b.AM_Region, b.AM_Group,b.AM
     '''
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()

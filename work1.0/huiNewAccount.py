@@ -79,9 +79,9 @@ def jieba_(ls):
 
 def main():
     path = r'D:\陈怀玉\工作\月工作\新开户跟进-辉\账户新开跟进'
-    icrm = '消费报告 20190905_20190905.csv'
-    hui = '170517-190902.xlsx'
-    target = '已开户公司确认 v19.xlsx'
+    icrm = '消费报告 20191017_20191017.csv'
+    hui = '170517-191008.xlsx'
+    target = '已开户公司确认 v21.xlsx'
     
     # 已消费户 df_t['icrm公司名称]
     df_t = readFile(os.path.join(path, target), shtname='对应')
