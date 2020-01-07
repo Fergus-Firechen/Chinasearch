@@ -22,7 +22,7 @@ today = datetime.datetime.today()
 # 输入
 # 1.N:前1日=1；前2日=0；前3日=-1...依次类推
 # 
-N = 1  # 改2
+N = 2  # 改2
 # 修改 AVG.日期
 yes = today-datetime.timedelta(N)
 
@@ -163,8 +163,8 @@ print('耗时：{:3f}'.format((time.clock() - start)/60))
 
 # 均值
 def avg():
-    str_avg_work = '=average(ef3:eg3,dy3:ec3)'
-    str_avg_week = '=average(dw3:dx3,ed3:ee3)'
+    str_avg_work = '=average(en3:eq3,et3:eu3,ex3)'
+    str_avg_week = '=average(er3:es3,ey3:ez3)'
     
     
     '''  均值 '''
@@ -181,54 +181,61 @@ def avg():
         print('耗时：{:3f}'.format((time.clock() - start)/60))
     
     # avg SaudiCommissionForTourism&NationalHeritage用  hkd-sauditourism-1909  日均 *0.6   max(1,200,000)
-# =============================================================================
-#     sht2['MN12364'].value = 0  # .formula = str_avg_work.replace('3', str(12364)) + '*0.05' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
-#     sht2['MO12364'].value = 0
-#     # sht2['MO12364'].formula = str_avg_week.replace('3', str(12364)) + '*0.1' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
-#     sht3['MN12364'].value = 0  # .formula = str_avg_work.replace('3', str(12364)) + '*0.05' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
-#     # sht3['MO12364'].formula = str_avg_week.replace('3', str(12364)) + '*0.1' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
-#     sht3['MO12364'].value = 0
-#     sht4['MN12364'].value = 0 # = "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
-#     sht4['MO12364'].value = 0 # formula = "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
-# =============================================================================
+    sht2['MN12364'].value = 0  # .formula = str_avg_work.replace('3', str(12364)) + '*0.05' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
+    sht2['MO12364'].value = 0
+    # sht2['MO12364'].formula = str_avg_week.replace('3', str(12364)) + '*0.1' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
+    sht3['MN12364'].value = 0  # .formula = str_avg_work.replace('3', str(12364)) + '*0.05' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
+    # sht3['MO12364'].formula = str_avg_week.replace('3', str(12364)) + '*0.1' # "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,原生广告!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
+    sht3['MO12364'].value = 0
+    sht4['MN12364'].value = 0 # = "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
+    sht4['MO12364'].value = 0 # formula = "=(SUM($BB$12364:$BD$12364)/SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))*(1200000-SUM($BB$12364:$BD$12364,搜索!$BB$12364:$BD$12364))/SUM('Date List'!$H$14:$H$15)"
     
-# =============================================================================
-#     # VenetianCotaiLimited
-#     for n in [9160, 9161, 9162, 9163, 9416, 10900]:
-#         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.2' 
-#         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.2' 
-#         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6' 
-#         sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6' 
-#         sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6'   #.value = 1000
-#         sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6'   # .value = 1000 
-# =============================================================================
+    # VenetianCotaiLimited
+    for n in [9160, 9161, 9162, 9163, 9416, 10900]:
+        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.2' 
+        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.2' 
+        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.2' 
+        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.2' 
+        sht4['MN' + str(n)].value = 0
+        sht4['MO' + str(n)].value = 0
     
-# =============================================================================
-#     # 万洲金业集团有限公司
-#     for n in [12195, 12196, 12444]:
-#         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
-#         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
-#         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
-#         sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
-#         sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
-#         sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
-# =============================================================================
+    # 万洲金业集团有限公司
+    for n in [12195, 12196, 12444]:
+        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+        sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+        
+    # BurberryAsiaLimited
+    for n in [2157, 12316]:
+        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
+        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
+        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
+        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
+        sht4['MN' + str(n)].value = 0
+        sht4['MO' + str(n)].value = 0 
+    
     
     # 潘多拉珠宝亚太有限公司
     for n in [6284, 7441, 8093]:
-        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.4' 
-        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.4' 
-        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.4' 
-        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.4' 
+        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
         sht4['MN' + str(n)].value = 0
         sht4['MO' + str(n)].value = 0 
     
     # THENET-A-PORTERGROUPLIMITED
+    # 
     for n in [8412, 8464, 8785, 9048, 9231, 9402, 9834, 10324]:
-        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6' 
-        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6' 
-        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6' 
-        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6' 
+# =============================================================================
+#         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6' 
+#         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6' 
+#         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6' 
+#         sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6' 
+# =============================================================================
         sht4['MN' + str(n)].value = 0
         sht4['MO' + str(n)].value = 0 
     
@@ -242,8 +249,8 @@ def avg():
         sht3['MO' + str(n)].value = 0 
     
     # TOURISMANDEVENTSQUEENSLAND
+    for n in [10367, 10377]:
 # =============================================================================
-#     for n in [10367, 10377]:
 #         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.3' 
 #         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.3' 
 #         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.3' 
@@ -257,13 +264,15 @@ def avg():
         sht4['MO' + str(n)].value = 0  # .formula = str_avg_week.replace('3', str(n)) + '*0.1' 
     
     # AdobeSystemsHongKongLimited
-    for n in [9613, 12446]:
-        sht4['MN' + str(n)].value = 0
-        sht4['MO' + str(n)].value = 0 
-        sht2['MN' + str(n)].value = 0
-        sht2['MO' + str(n)].value = 0 
-        sht3['MN' + str(n)].value = 0
-        sht3['MO' + str(n)].value = 0 
+# =============================================================================
+#     for n in [9613, 12446]:
+#         sht4['MN' + str(n)].value = 0
+#         sht4['MO' + str(n)].value = 0 
+#         sht2['MN' + str(n)].value = 0
+#         sht2['MO' + str(n)].value = 0 
+#         sht3['MN' + str(n)].value = 0
+#         sht3['MO' + str(n)].value = 0 
+# =============================================================================
     
     # UNIVERSITYOFSYDNEY
 # =============================================================================
@@ -284,42 +293,53 @@ def avg():
 # =============================================================================
     
     # StudentUniverse.comInc
-    for n in [6273, 10092]:
-        sht4['MN' + str(n)].value = 0
-        sht4['MO' + str(n)].value = 0 
+# =============================================================================
+#     for n in [6273, 10092]:
+#         sht4['MN' + str(n)].value = 0
+#         sht4['MO' + str(n)].value = 0 
+# =============================================================================
     
     # VIAGOGOAG 1  11488, 
     # LenzingAktiengesellschaft 1
     # AutismPartnershipLimited 1  12108,
     # MichaelPageInternational(hongkong)limited 1
-    for n in [12035, 18]:
+# =============================================================================
+#     for n in [12035, 18]:
+#         sht4['MN' + str(n)].value = 0
+#         sht4['MO' + str(n)].value = 0 
+# =============================================================================
+    
+    # Etoro(Uk)Limited 1
+    # 万代南梦宫娱乐香港有限公司 1 
+    # AkamaiTechnologies.Inc 1
+    for n in [12350, 10211, 9540]:
+        sht2['MN' + str(n)].value = 0
+        sht2['MO' + str(n)].value = 0 
+        sht3['MN' + str(n)].value = 0
+        sht3['MO' + str(n)].value = 0 
         sht4['MN' + str(n)].value = 0
         sht4['MO' + str(n)].value = 0 
     
-    # TNTNederlandB.V.
-    # Etoro(Uk)Limited 1
-    for n in [9428, 12350]:
+    # 香港鑫圣金业集团有限公司
+    for n in [2342, 2777, 6348, 6415, 6416, 6417, 6418]:
+# =============================================================================
+#         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n))
+#         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n))
+#         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n))
+#         sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n))
+# =============================================================================
+        sht2['MN' + str(n)].value = 0
         sht2['MO' + str(n)].value = 0
-        sht2['MO' + str(n)].value = 0 
-        sht3['MO' + str(n)].value = 0
+        sht3['MN' + str(n)].value = 0
         sht3['MO' + str(n)].value = 0 
-        sht4['MO' + str(n)].value = 0
-        sht4['MO' + str(n)].value = 0 
-    
-# =============================================================================
-#     # 香港鑫圣金业集团有限公司
-#     for n in [2342, 2777, 6348, 6415, 6416, 6417, 6418]:
-#         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
-#         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
-#         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
-#         sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
-#         sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
-#         sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
-# =============================================================================
+        sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.8' 
+        sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.8' 
+    for n in [6418]:
+        sht2['MN' + str(n)].value = 17000
+        sht2['MO' + str(n)].value = 12000
     
     # Worldfirst
-    # DieSchweizerischePostAg 1
-    for n in [7900, 9916, 11051, 12230, 12082]:
+    for n in [7900, 9916, 11051, 12230]:
         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
@@ -348,16 +368,20 @@ def avg():
     
     # 国际移动娱乐有限公司
     for n in [9941, 10019, 10089, 10603, 10641, 10694, 11181, 11182, 11214, 11215, 12207, 12329]:        
-        sht2['MN' + str(n)].value = 0 
-        sht2['MO' + str(n)].value = 0        
-        sht3['MN' + str(n)].value = 0 
-        sht3['MO' + str(n)].value = 0        
-        sht4['MN' + str(n)].value = 0 
+# =============================================================================
+#         sht2['MN' + str(n)].value = 0 
+#         sht2['MO' + str(n)].value = 0        
+#         sht3['MN' + str(n)].value = 0 
+#         sht3['MO' + str(n)].value = 0        
+#         sht4['MN' + str(n)].value = 0
+#         sht4['MO' + str(n)].value = 0
+# =============================================================================
+        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
+        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
+        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
+        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
+        sht4['MN' + str(n)].value = 0
         sht4['MO' + str(n)].value = 0
-        # sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
-        # sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
-        # sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
-        # sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
         # sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
         # sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.7' 
     
@@ -369,13 +393,12 @@ def avg():
         sht3['MO' + str(n)].value = 0        
         sht4['MN' + str(n)].value = 0 
         sht4['MO' + str(n)].value = 0
-             
     for n in [12219]: 
         sht2['MN' + str(n)].value = 17000
-        sht2['MO' + str(n)].value = 0        
+        sht2['MO' + str(n)].value = 2000    
         sht3['MN' + str(n)].value = 0 
         sht3['MO' + str(n)].value = 0        
-        sht4['MN' + str(n)].value = 2000
+        sht4['MN' + str(n)].value = 0
         sht4['MO' + str(n)].value = 0
 # =============================================================================
 #         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.7' 
@@ -388,13 +411,21 @@ def avg():
 
     # 金荣中国
     # 客户预算砍半
-    for n in [2329, 2458, 7941, 7942]:
-        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
-        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
-        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
-        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
-        sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
-        sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+    for n in [2329, 2458, 7941, 7942]:  
+        sht2['MN' + str(n)].value = 0 
+        sht2['MO' + str(n)].value = 0        
+        sht3['MN' + str(n)].value = 0 
+        sht3['MO' + str(n)].value = 0        
+        sht4['MN' + str(n)].value = 0 
+        sht4['MO' + str(n)].value = 0
+# =============================================================================
+#         sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+#         sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+#         sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+#         sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+#         sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+#         sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+# =============================================================================
 
     # 兴业证劵有限公司
 # =============================================================================
@@ -410,7 +441,9 @@ def avg():
     # GlobalKapitalHoldingsLtd.  2
     # InterechoLimited 1
     # AtGlobalMarkets(Uk)Limited 1
-    for n in [12445, 12482, 12478, 12487]: # 3245, 3246, 3540, 3808, 
+    # hkd-xuanhot-1902 1
+    # hkd-huitoutiao-1810 1
+    for n in [12445, 12482, 12478, 12487, 11873, 10936]: # 3245, 3246, 3540, 3808, 
         sht2['MN' + str(n)].value = 0
         sht2['MO' + str(n)].value = 0     
         sht3['MN' + str(n)].value = 0 
@@ -418,6 +451,33 @@ def avg():
         sht4['MN' + str(n)].value = 0 
         sht4['MO' + str(n)].value = 0
     
+    # 艾德金业有限公司
+    # GroupeKedgeBusinessSchool 1
+    for n in [12100, 12428, 10091]:
+        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6' 
+        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6' 
+        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.6' 
+        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.6' 
+        sht4['MN' + str(n)].value = 0
+        sht4['MO' + str(n)].value = 0 
+        
+        
+    # SONDERCLOUDLIMITED
+    for n in [8603, 10385]:
+        sht2['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht2['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+        sht3['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht3['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+        sht4['MN' + str(n)].formula = str_avg_work.replace('3', str(n)) + '*0.5' 
+        sht4['MO' + str(n)].formula = str_avg_week.replace('3', str(n)) + '*0.5' 
+        
+    # 忽略
+    # 财团法人台湾贸易中心
+    # 金道贵金属有限公司
+    
+    # hkd-marriottfliggy-1810
+    
+
 # =============================================================================
 #     
 # avg()
