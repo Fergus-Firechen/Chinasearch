@@ -23,8 +23,9 @@ def dat():
 	return (date.today() - timedelta(eval(n))).strftime('%Y%m%d')  # 改 
 
 DATE = dat()
+version = input("Version: ( v1? )")
 print('DATE = {}'.format(DATE))
-target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE
+target = r'C:\Users\chen.huaiyu\Desktop\Output\SQL Server' + '\\' + DATE + ' ' + version
 server_name = 'SZ-CS-0038LT\SQLEXPRESS'
 db_name = 'Output'
 db_name_table_1 = 'P4P_20181211_1'.replace('20181211', DATE)
@@ -36,7 +37,6 @@ cnxn = pyodbc.connect('Driver={SQL Server};'
                       'Trusted_Connection=yes;'
                       ) 
 cursor = cnxn.cursor()
-
 
 # Merge P4P & NP & Infeeds
 cursor.execute('''
@@ -75,6 +75,19 @@ cursor.execute('''
                 from Infeeds_20191002 a inner join Forex1 b on a.用户名=b.用户名1
                '''.replace('20191002', DATE))
 cnxn.commit()
+
+# 修改 
+# 1. 3月AVG都只需要 直接把cny-jrjr-2 地區改去 SZ
+# 2. AM 轉黄希腾
+sql = ''' update {}
+    set 区域='SZ', AM='黄希腾', Industry='金融服务'
+    where 用户名 = 'cny-jrjr-2'
+    '''
+for i in ['P4P_', 'NP_', 'Infeeds_']:
+    i += DATE
+    cursor.execute(sql.format(i))
+cnxn.commit()
+
 
 # try:
 # Excel File:Spending Forecast
@@ -274,8 +287,8 @@ select AM,
     端口, 
     用户名, 
     广告主, 
-    sum([Ave# Daily Workday]) as [avg_daily_workday], 
-    sum([Ave# Daily Holiday]) as [avg_daily_holiday],
+	sum([Ave# Daily Workday]) as avg_daily_workday,
+    sum([Ave# Daily Holiday]) as avg_daily_holiday,
 	sum([Jan Spending Forecast]) as Jan_20,
 	sum([Feb Spending Forecast]) as Feb_20,
 	sum([Mar Spending Forecast]) as Mar_20,
@@ -660,7 +673,7 @@ sht['A3'].value = list(map(list, item))
 # NP
 cursor.execute(sql.replace('P4P_20191002', 'NP_'+DATE))
 item = cursor.fetchall()
-sht['A23'].value = list(map(list, item))
+sht['A28'].value = list(map(list, item))
 # Infeeds
 # sql
 sql = '''
@@ -681,7 +694,7 @@ order by a.NB, a.销售
 '''
 cursor.execute(sql.replace('Infeeds_20191002', 'Infeeds_'+DATE))
 item = cursor.fetchall()
-sht['A43'].value = list(map(list, item))
+sht['A53'].value = list(map(list, item))
 
 wb.app.calculation = 'automatic'
 wb.save()

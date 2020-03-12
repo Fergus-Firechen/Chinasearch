@@ -28,9 +28,9 @@ yes = today-datetime.timedelta(N)
 
 # 直接引用邮件中文件
 path = r'H:\SZ_数据\Input'
-name = 'P4P 消费报告' + str(yes.year) + '.' + str(yes.month) + '..F.xlsx'
+name = 'P4P 消费报告' + str(yes.year) + '.0' + str(yes.month) + '..F.xlsx'
 wb1 = xw.Book(os.path.join(path, name))
-#wb1 = xw.books(r'P4P 消费报告2019.10.15')
+#wb1 = xw.books(r'P4P 消费报告2020.03.' + str(yes.day))
 
 sht1 = wb1.sheets['P4P消费']
 sht20 = wb1.sheets['搜索点击消费']
@@ -70,7 +70,7 @@ range40 = sht40[9:row11, column11:column12 + 1]
 
 # 繁  # 改 1
 path = r'C:\Users\chen.huaiyu\Downloads'
-#name = 'Ave.workday&weekdayQ4(2019 Oct to Dec)2019.11.5' + '.xlsx'
+#name = 'Ave.workday&weekdayQ1(2020 Jan to Mar)2020.03.04' + '.xlsx'
 name = ('Ave.workday&weekdayQ1(2020 Jan to Mar)2020' + '.' + yes.strftime('%m.%d') + '.xlsx')
 wb2 = xw.Book(os.path.join(path, name))
 wb2.app.calculation = 'manual'
@@ -161,10 +161,24 @@ for i in [sht2, sht3, sht4]:
 wb2.save()
 print('耗时：{:3f}'.format((time.clock() - start)/60))
 
+def exFile():
+    import pandas as pd
+    path = r'C:\Users\chen.huaiyu\Downloads\reminder_2020.02.12.xlsx'
+    df = pd.read_excel(path)
+    df.dropna(axis=0, how='all', inplace=True)
+    df.dropna(axis=1, how='all', inplace=True)
+    
+    # columns
+    df.columns = df.loc[2, :]
+    
+    return df
+    
+    
+    
 # 均值
 def avg():
-    str_avg_work = '=average(BP3:BQ3,BM3:BN3,BJ3,BF3:BG3)'
-    str_avg_week = '=average(BR3:BS3,BO3,BK3:BL3)'
+    str_avg_work = '=average(ee3:eg3)'
+    str_avg_week = '=average(ec3:ed3)'
     
     
     '''  均值 '''
@@ -179,6 +193,7 @@ def avg():
         # '''
         i['MK3:ML3'].api.AutoFill(i['MK3:ML' + str(row201)].api, constants.AutoFillType.xlFillCopy)
         print('耗时：{:3f}'.format((time.clock() - start)/60))
+        
 # =============================================================================
 #     
 # avg()
