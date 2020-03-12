@@ -149,7 +149,7 @@ def toEx(col, data, conn):
         wb = xw.Book(getPath())
         wb.app.calculation = 'manual'
         print(wb.sheets)
-        for shtName in ['Master', 'Pay']:
+        for shtName in ['Master']:
             sht = wb.sheets[shtName]
             nums = sht['A1'].current_region.rows.count
             rng = sht['A1'].offset(nums+1, 0)

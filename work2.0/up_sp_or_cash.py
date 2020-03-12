@@ -102,6 +102,7 @@ def read_file(obj):
     global df1, df3  #df2, 
     '==icrm 消费/现金csv=='
     path = r'H:\SZ_数据\Input\每日百度消费.xlsx'
+    #path = r'C:\Users\chen.huaiyu\Downloads\每日百度消费.xlsx'
     if (os.path.exists(a.print_path()) and os.path.exists(path) 
         and (time.strftime('%Y%m%d', time.localtime(os.stat(path).st_mtime)) 
             == time.strftime('%Y%m%d', time.localtime(time.time())))):  # 20191118

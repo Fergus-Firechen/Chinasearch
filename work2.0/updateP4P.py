@@ -6,7 +6,7 @@ Created on Mon Jun  3 17:16:26 2019
 # 
 # 获取basicInfo，消费
 # 写入excel
-# 填充
+# 填充(0)
 # 无线待完善
 
 @author: chen.huaiyu

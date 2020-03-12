@@ -215,7 +215,7 @@ def dataCleaning(dic, content):
     # '合并 求差集'
     global df
     df = df.append(df1, sort=False)
-    df.drop_duplicates('用户名', keep='last', inplace=True)
+    df.drop_duplicates('用户名', keep='first', inplace=True)
     
 def update_KH_flag(lis):
     for i in lis:
