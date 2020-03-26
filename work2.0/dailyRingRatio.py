@@ -32,7 +32,7 @@ def nearly5Workdays(n=7, m=0):
 # 输出文件命名
 def giveName():
     global date1
-    path = ('C:\\Users\\chen.huaiyu\\Desktop\\Output\\' + str(date1[-1].day) + 
+    path = ('H:\SZ_数据\Download\\' + str(date1[-1].day) + 
             '日环比' + str(date1[-2].day) + '日 v1.xlsx')
     return path
 
@@ -44,13 +44,13 @@ def sourceData():
     date3 = date1[0].strftime('%Y')
     if date1[0].month == date1[-1].month:   # 是否跨月
         path = (r'H:\SZ_数据\Input\P4P 消费报告' + date2 +
-                 date1[-1].strftime('%m.') + '..xlsx')
+                 date1[-1].strftime('%m.') + '.F.xlsx')
         path1 = ''
     else:
         path = (r'H:\SZ_数据\Input\P4P 消费报告' + date2 +
-                date1[-1].strftime('%m.') + '..xlsx')
+                date1[-1].strftime('%m.') + '.F.xlsx')
         path1 = (r'H:\SZ_数据\Input\P4P 消费报告' + str(date3) + '.'
-                    + date1[0].strftime('%m.') + '..xlsx')
+                    + date1[0].strftime('%m.') + '.F.xlsx')
     return path, path1
 
 # P4P消费转移
@@ -185,7 +185,7 @@ def adRingRatio():
     ar4 = ar2.groupby(by=['广告主', 'AM']).sum()
     ar4['环比增长'] = (ar4[str(date1[-1].day) + '日P4P消费'] - ar4[str(date1[-2].day) 
                       + '日P4P消费'])
-    ar4['昨日环比日均'] = (ar4[str(date1[-2].day) + '日P4P消费'] - ar4['近5工作日均P4P'])
+    ar4['昨日环比日均'] = (ar4[str(date1[-1].day) + '日P4P消费'] - ar4['近5工作日均P4P'])
     ar4.reset_index(inplace=True)
     ar = ar4[['AM', '广告主', str(date1[-2].day) + '日P4P消费', str(date1[-1].day) + '日P4P消费', 
               '环比增长', '近5工作日均P4P', '昨日环比日均']]
@@ -212,7 +212,7 @@ def agencyRingRatio():
     ar4 = ar2.groupby(by=['客户', 'channel']).sum()
     ar4['环比增长'] = (ar4[str(date1[-1].day) + '日P4P消费'] - ar4[str(date1[-2].day) 
                       + '日P4P消费'])
-    ar4['昨日环比日均'] = (ar4[str(date1[-2].day) + '日P4P消费'] - ar4['近5工作日均P4P'])
+    ar4['昨日环比日均'] = (ar4[str(date1[-1].day) + '日P4P消费'] - ar4['近5工作日均P4P'])
     ar4.reset_index(inplace=True)
     ag = ar4[['客户', 'channel', str(date1[-2].day) + '日P4P消费', str(date1[-1].day) + '日P4P消费', 
               '环比增长', '近5工作日均P4P', '昨日环比日均']]
@@ -238,7 +238,7 @@ def ringSummary():
         elif i in ['鲁东栋', '陈宛欣']:
             list_1.append('深圳区')
             list_2.append('刘婷')
-        elif i in ['Olivia', 'Tibby', 'Bruce']:
+        elif i in ['Olivia', 'Ada', 'Tina']:
             list_1.append('香港区')
             list_2.append('Kendi组')
         elif i in ['Jacqueline',  'Estelle', 'Jessie']:
@@ -468,10 +468,7 @@ if __name__ == '__main__':
     wb1 = excel.Workbooks.Open(giveName())
     sht1 = wb1.Worksheets('环比汇总表')
     
-    yesDateStr = (datetime.date.today()-datetime.timedelta(1)).strftime('%Y.%m.%d')
-    fileName = 'P4P 消费报告' + yesDateStr + '.xlsx'
-    filePath = r'c:\users\chen.huaiyu\desktop'
-    path = os.path.join(filePath, fileName)
+    path = sourceData()[0]
     wb2 = excel.Workbooks.Open(path)
     sht2 = wb2.Worksheets('P4P消费')
     

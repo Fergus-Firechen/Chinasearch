@@ -6,7 +6,7 @@ Created on Mon Jun  3 17:16:26 2019
 # 
 # 获取basicInfo，消费
 # 写入excel
-# 填充
+# 填充(0)
 # 无线待完善
 
 @author: chen.huaiyu
@@ -18,8 +18,23 @@ from xlwings import constants
 import xlwings as xw
 import pandas as pd
 import configparser
-import os, time
+import functools
+import time
+import os
 
+
+now = lambda : time.perf_counter()
+
+def cost_time(func):
+    @functools.wraps(func)
+    def wrapper(*args):
+        st = now()
+        print('{}() start:'.format(func.__name__))
+        func(*args)
+        ed = now()
+        print('Run time {} min'.format(round((st - ed)/60, 3)))
+    return wrapper
+    
 
 class Sqlserver(object):
     
@@ -60,8 +75,8 @@ class Sqlserver(object):
                          '无线搜索点击'] and isinstance(date, str)):
             # 获取表头
             sql = '''
-            select * from information_schema.columns where table_name=%s
-            '''
+                select * from information_schema.columns where table_name=%s
+                '''
             col = [i[3] for i in engine.execute(sql, self.__tablename).fetchall()]
             col.append('金额')
             
@@ -78,18 +93,20 @@ class Sqlserver(object):
                     '''
             else:
                 sql = '''
-                select a.*, b.金额
-                from [Account Management].[dbo].basicInfo a
-                left join 
-                (select * from [Account Management].[dbo].消费
-                where 类别=%s and 日期=%s ) b
-                on a.用户名 = b.用户名
-                order by Id
-                '''
+                    select a.*, b.金额
+                    from [Account Management].[dbo].basicInfo AS a
+                    left join 
+                    (select * from [Account Management].[dbo].消费
+                    where 类别=%s and 日期=%s ) AS b
+                    on a.用户名 = b.用户名
+                    order by Id
+                    '''
             data = engine.execute(sql, (category, date)).fetchall()
-            
+            print(len(data))
             # 返回DataFrame
-            return pd.DataFrame(data, columns=col)
+            df = pd.DataFrame(data, columns=col)
+            
+            return df
     
     
 class Excel(object):
@@ -104,11 +121,19 @@ class Excel(object):
     def excel_path(self):
         ''' Excel路径生成
         '''
-        date_str = datetime.strptime(self._date, '%Y%m%d').strftime('%Y.%m..')
+        date_str = datetime.strptime(self._date, '%Y%m%d').strftime('%Y.%m..F')
         if obj == '现金':
-            return self.path + date_str + 'cash.xlsx'
+            path = self.path + date_str + 'cash.xlsx'
+            if os.path.exists(path):
+                return path
+            else:
+                print('NotFoundFil: {}'.format(path))
         else:
-            return self.path + date_str + '.xlsx'
+            path = self.path + date_str + '.xlsx'
+            if os.path.exists(path):
+                return path
+            else:
+                print('NotFoundFil: {}'.format(path))
     
     def toExcel(self, df, sht):
         ''' 写入
@@ -179,6 +204,7 @@ class Excel(object):
         else:
             print('5 日环比')
 
+
 def main(dateStr):
     # 实例化
     DB = Sqlserver('basicInfo')
@@ -186,18 +212,27 @@ def main(dateStr):
     ex = Excel(dateStr)
     # 准备excel表格
     wb = xw.Book(ex.excel_path())
+    wb.app.calculation = 'manual'
     shtList = ['P4P消费', '搜索点击消费', '新产品消费（除原生广告）', 
                '原生广告', '无线搜索点击消费']
+    lis = ['总点击', '搜索点击', '新产品', '自主投放', '无线搜索点击']
     # 获取数据
-    for n, i in enumerate(['总点击', '搜索点击', '新产品', '自主投放', 
-                           '无线搜索点击']):
+    if all_mob == 'all' or all_mob == '':
+        pass
+    elif all_mob == 'mob':
+        shtList = [shtList[-1]]
+        lis = [lis[-1]]
+    else:
+        print('all_mob需输入:all(全部) or mob(无线)')
+        lis = []
+        shtList = []
+    for n, i in enumerate(lis):
         print(n, i)
         df = DB.querySpending(engine, i, dateStr)
         sht = wb.sheets[shtList[n]]
         # 写入
         ex.toExcel(df, sht)
-    wb.app.calculation = 'automatic'
-    wb.app.calculation = 'manual'
+    wb.app.calculate()
     # 每日消费走势
     if periods == 1:
         sht = wb.sheets['每日消费走势']
@@ -207,14 +242,16 @@ def main(dateStr):
         # wb.close()
         print('\a程序结束')
     
-    
+
 if __name__ == '__main__':
     
     # 日期锁定
+    print('Note: upEx')
     star = time.perf_counter()
     start = input('输入起始日期(20190101)：')
     periods = eval(input('输入持续日期数(1,2,...,n)：'))
-    obj = input('消费/现金?,(默认消费)：')
+    obj = input('消费/现金?(默认消费)：')
+    all_mob = input("mob/all？(默认all)")
     if obj == '':
         obj = '消费'
         print(obj)

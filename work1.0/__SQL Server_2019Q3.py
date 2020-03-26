@@ -76,9 +76,9 @@ sql = '''
     sum([2019Apr]) as Apr_19,
     sum([2019May]) as May_19,
     sum([2019Jun]) as Jun_19,
-    sum([Jul Spending Forecast]) as Jul_19,
-    sum([Aug Spending Forecast]) as Aug_19,
-    sum([Sep Spending Forecast]) as Sep_19,
+    sum([2019Jul]) as Jul_19,
+    sum([2019Aug]) as Aug_19,
+    sum([2019Sep]) as Sep_19,
     sum([Oct Spending Forecast]) as Oct_19,
     sum([Nov Spending Forecast]) as Nov_19,
     sum([Dec Spending Forecast]) as Dec_19
@@ -147,9 +147,9 @@ sql = '''
     sum([2019Apr]) as Apr_19,
     sum([2019May]) as May_19,
     sum([2019Jun]) as Jun_19,
-    sum([Jul Spending Forecast]) as Jul_19,
-    sum([Aug Spending Forecast]) as Aug_19,
-    sum([Sep Spending Forecast]) as Sep_19,
+    sum([2019Jul]) as Jul_19,
+    sum([2019Aug]) as Aug_19,
+    sum([2019Sep]) as Sep_19,
     sum([Oct Spending Forecast]) as Oct_19,
     sum([Nov Spending Forecast]) as Nov_19,
     sum([Dec Spending Forecast]) as Dec_19
@@ -213,22 +213,22 @@ if rows100 < rows101:  # 如用户名有新增；则向下填充公式
 # Pivot Table (区域)
 # P4P
 sql = '''
-select 区域, sum([2019Jan]) as Jan_19,
-sum([2019Feb]) as Feb_19,
-sum([2019Mar]) as Mar_19,
-sum([2019Apr]) as Apr_19,
-sum([2019May]) as May_19,
-sum([2019Jun]) as Jun_19,
-sum([Jul Spending Forecast]) as Jul_19,
-sum([Aug Spending Forecast]) as Aug_19,
-sum([Sep Spending Forecast]) as Sep_19,
-sum([Oct Spending Forecast]) as Oct_19,
-sum([Nov Spending Forecast]) as Nov_19,
-sum([Dec Spending Forecast]) as Dec_19
-from P4P_20190402
-where 端口 not like '%wrong%' and 区域 <> '-'
-group by 区域
-order by 区域
+    select 区域, sum([2019Jan]) as Jan_19,
+    sum([2019Feb]) as Feb_19,
+    sum([2019Mar]) as Mar_19,
+    sum([2019Apr]) as Apr_19,
+    sum([2019May]) as May_19,
+    sum([2019Jun]) as Jun_19,
+    sum([2019Jul]) as Jul_19,
+    sum([2019Aug]) as Aug_19,
+    sum([2019Sep]) as Sep_19,
+    sum([Oct Spending Forecast]) as Oct_19,
+    sum([Nov Spending Forecast]) as Nov_19,
+    sum([Dec Spending Forecast]) as Dec_19
+    from P4P_20190402
+    where 端口 not like '%wrong%' and 区域 <> '-'
+    group by 区域
+    order by 区域
 '''
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()
@@ -253,23 +253,23 @@ print('注2：\nSpending Forecast _v1')
 wb = xw.Book(target+'\\'+os.listdir(target)[1])
 sht = wb.sheets['P4P']
 sql = '''
-select AM, 端口, 用户名, 广告主, sum([Ave# Daily Workday]) as [avg_daily_workday], sum([Ave# Daily Holiday]) as [avg_daily_holiday],
-sum([2019Jan]) as Jan_19,
-sum([2019Feb]) as Feb_19,
-sum([2019Mar]) as Mar_19,
-sum([2019Apr]) as Apr_19,
-sum([2019May]) as May_19,
-sum([2019Jun]) as Jun_19,
-sum([Jul Spending Forecast]) as Jul_19,
-sum([Aug Spending Forecast]) as Aug_19,
-sum([Sep Spending Forecast]) as Sep_19,
-sum([Oct Spending Forecast]) as Oct_19,
-sum([Nov Spending Forecast]) as Nov_19,
-sum([Dec Spending Forecast]) as Dec_19
-from P4P_20190402
-where 端口 not like '%wrong%'
-group by AM, 端口, 用户名, 广告主
-order by AM, 端口, 用户名, 广告主
+    select AM, 端口, 用户名, 广告主, sum([Ave# Daily Workday]) as [avg_daily_workday], sum([Ave# Daily Holiday]) as [avg_daily_holiday],
+    sum([2019Jan]) as Jan_19,
+    sum([2019Feb]) as Feb_19,
+    sum([2019Mar]) as Mar_19,
+    sum([2019Apr]) as Apr_19,
+    sum([2019May]) as May_19,
+    sum([2019Jun]) as Jun_19,
+    sum([2019Jul]) as Jul_19,
+    sum([2019Aug]) as Aug_19,
+    sum([2019Sep]) as Sep_19,
+    sum([Oct Spending Forecast]) as Oct_19,
+    sum([Nov Spending Forecast]) as Nov_19,
+    sum([Dec Spending Forecast]) as Dec_19
+    from P4P_20190402
+    where 端口 not like '%wrong%'
+    group by AM, 端口, 用户名, 广告主
+    order by AM, 端口, 用户名, 广告主
 '''
 cursor.execute(sql.replace('20190402', DATE))
 item = cursor.fetchall()

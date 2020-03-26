@@ -17,6 +17,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 
 
+now = lambda : time.perf_counter()
 
 class array(object):
     '''构造序列：日期，icrm字段
@@ -52,7 +53,7 @@ class array(object):
     
     def print_path(self):
         path0 = os.getcwd()
-        path = r"c:\users\chen.huaiyu\downloads"
+        path = r"H:\SZ_数据\Download"
         # 统一文件名
         os.chdir(path)
         for i in filter(lambda x: '~' in x, os.listdir()):
@@ -78,10 +79,10 @@ def cost_time(func):
     @functools.wraps(func)
     def wrapper(*args):
         print('%s() start:' %func.__name__)
-        start_time = time.time()
+        st = now()
         func(*args)
-        end_time = time.time()
-        print('\a\a cost time: %.2f min' % ((end_time-start_time)/60))
+        ed = now()
+        print('\a\a cost time: %.3f min' % ((ed-st)/60))
     return wrapper
 
 @cost_time
@@ -100,31 +101,37 @@ def dfFromDB(tableName):
 def read_file(obj):
     global df1, df3  #df2, 
     '==icrm 消费/现金csv=='
-    df1 = pd.read_csv(a.print_path(), engine='python', encoding='gbk')
-    df1.rename(columns={'账户名称':'用户名'}, inplace=True)
-    df1['用户名'] = df1['用户名'].astype(str)
-    df1.drop(columns='账户ID', inplace=True)
-    '==百通=='
-    wb = xw.Book(r'H:\SZ_数据\Input\每日百度消费.xlsx')
-    sheet = 'P4P消费'+str(a.print_date().month)+'月'
-    sht = wb.sheets[sheet]
-    cnt = sht['A39'].current_region.rows.count - 2
-    df3 = pd.DataFrame(sht[38:38+cnt, :33].value)
-    #df3 = pd.read_excel(r'H:\SZ_数据\Input\每日百度消费.xlsx', sheet_name=sheet).iloc[38:cnt+38,:]
-    '结构整理'
-    df3.iloc[1, 0] = '用户名'
-    df3.columns = df3.iloc[1, :].tolist()
-    df3.drop(index=[0, 1], inplace=True)
-    df3.drop(columns='总计', inplace=True)
-    df3.set_index('用户名', drop=True, inplace=True)
-    df3.dropna(inplace=True, how='all', axis=1)
-    df3.columns = [i.strftime('%Y%m%d') for i in df3.columns]
-    df3 = df3.loc[:, a.date()[0]:a.date()[-1]]
-    df3.columns = a.field()[4]
-    if obj == '现金':
-        df3 = df3.applymap(lambda x: x/1.22)
+    path = r'H:\SZ_数据\Input\每日百度消费.xlsx'
+    #path = r'C:\Users\chen.huaiyu\Downloads\每日百度消费.xlsx'
+    if (os.path.exists(a.print_path()) and os.path.exists(path) 
+        and (time.strftime('%Y%m%d', time.localtime(os.stat(path).st_mtime)) 
+            == time.strftime('%Y%m%d', time.localtime(time.time())))):  # 20191118
+        df1 = pd.read_csv(a.print_path(), engine='python', encoding='gbk')
+        df1.rename(columns={'账户名称':'用户名'}, inplace=True)
+        df1['用户名'] = df1['用户名'].astype(str)
+        df1.drop(columns='账户ID', inplace=True)
+        '==百通=='
+        wb = xw.Book(path)
+        sheet = 'P4P消费'+str(a.print_date().month)+'月'
+        sht = wb.sheets[sheet]
+        cnt = sht['A39'].current_region.rows.count - 2
+        df3 = pd.DataFrame(sht[38:38+cnt, :33].value)
+        '结构整理'
+        df3.iloc[1, 0] = '用户名'
+        df3.columns = df3.iloc[1, :].tolist()
+        df3.drop(index=[0, 1], inplace=True)
+        df3.drop(columns='总计', inplace=True)
+        df3.set_index('用户名', drop=True, inplace=True)
+        df3.dropna(inplace=True, how='all', axis=1)
+        df3.columns = [i.strftime('%Y%m%d') for i in df3.columns]
+        df3 = df3.loc[:, a.date()[0]:a.date()[-1]]
+        df3.columns = a.field()[4]
+        if obj == '现金':
+            df3 = df3.applymap(lambda x: x/1.22)
+        else:
+            pass
     else:
-        pass
+        print('Check file "\n{} - \n{}"'.format(a.print_path(), path))
     
 def upload_ka(start, stop):
     
@@ -132,24 +139,29 @@ def upload_ka(start, stop):
         s = strToDate(arg)
         return s.strftime('%Y%m%d')
     
-    path = r"c:\users\chen.huaiyu\downloads"
+    path = r"H:\SZ_数据\Download"
     fil = '代理商用户报表_订单明细日粒度下载_%s-%s.csv' % (strf(start), strf(stop))
-    ka = pd.read_csv(os.path.join(path, fil), encoding='GBK')
-
-    # 筛选符合条件的数据
-    ka.drop(index=ka[ka['合同号'] == 'A17KA1289'].index, inplace=True)
-    ka.drop(index=ka[ka['广告主名称'] == '草莓有限公司'].index, inplace=True)
-
-    # 调整
-    ka.rename(columns={'发生日期':'日期', '收入金额':'金额', '合同号':'用户名'}, inplace=True)
-    ka['类别'] = 'KA'
-    ka_1 = ka[['日期', '金额', '用户名', '类别']]
-    ka_1['日期'] = pd.to_datetime(ka_1['日期'])
-    ka_1['日期'] = ka_1['日期'].apply(lambda x: x.strftime('%Y%m%d'))
-    ka_1['金额'] = ka_1['金额'].str.replace(',', '')
-    ka_1['金额'] = ka_1['金额'].apply(lambda x: eval(x))
-    ka_1.to_sql('消费', con=engine, if_exists='append', index=False, chunksize=1000)
+    if os.path.exists(os.path.join(path, fil)):
+        ka = pd.read_csv(os.path.join(path, fil), encoding='GBK', engine='python')
     
+        # 筛选符合条件的数据
+        if isinstance(ka, pd.DataFrame):
+            ka.to_sql('ka_basicInfo', con=engine, if_exists='replace', index=False)
+            #
+            ka.drop(index=ka[ka['合同号'] == 'A17KA1289'].index, inplace=True)
+            ka.drop(index=ka[ka['广告主名称'] == '草莓有限公司'].index, inplace=True)
+        
+            # 调整
+            ka.rename(columns={'发生日期':'日期', '收入金额':'金额', '合同号':'用户名'}, inplace=True)
+            ka['类别'] = 'KA'
+            ka_1 = ka[['日期', '金额', '用户名', '类别']]
+            ka_1['日期'] = pd.to_datetime(ka_1['日期'])
+            ka_1['日期'] = ka_1['日期'].apply(lambda x: x.strftime('%Y%m%d'))
+            ka_1['金额'] = ka_1['金额'].str.replace(',', '')
+            ka_1['金额'] = ka_1['金额'].apply(lambda x: eval(x))
+            ka_1.to_sql(a.target, con=engine, if_exists='append', index=False, chunksize=100)
+    else:
+        print('{} 文件不存在'.format(os.path.join(path, fil)))
 
 @cost_time
 def main():
@@ -196,18 +208,31 @@ def connectDB():
         conf = configparser.ConfigParser()
         if os.path.exists(CONF):
             conf.read(CONF)
+            sa = conf.get('SQL Server', 'accountname')
+            pw = conf.get('SQL Server', 'password')
             host = conf.get('SQL Server', 'ip')
             port = conf.get('SQL Server', 'port')
             dbname = conf.get('SQL Server', 'dbname')
-            return host, port, dbname
+            return sa, pw, host, port, dbname
     try:
         engine = create_engine(
-                "mssql+pymssql://@%s:%s/%s" % login())
+                "mssql+pymssql://%s:%s@%s:%s/%s" % login())
     except Exception as e:
         print('连接失败 %s' % e)
     else:
         print('连接成功')
         return engine
+
+def dele():
+    ''' 更新前先删除对应日期数据，防重 '''
+    def to_str(dat):
+        return dat.replace('-', '')
+    
+    sql = ''' DELETE FROM {} 
+                WHERE 日期 BETWEEN {} AND {}
+        '''
+    with engine.begin() as conn:
+        conn.execute(sql.format(val, to_str(star), to_str(stop)))
 
 def get_latest(folder):
     '获取文件夹中最新文件  暂时无用'
@@ -220,30 +245,31 @@ if __name__ == '__main__':
         # 连接 DB
         engine = connectDB()
         # 创造一个序列实列，以便生成所需要的各种列表
+        print('提示：SpendingOrCash')
         star = input('输入起始日期(2019-01-01):')
         stop = input('输入终止日期(2019-01-01):')
-        val = input('消费/现金？(默认消费):')
+        val = input('消费/Cash？(默认消费):')
         if val == '':
             val = '消费'
+        elif val == 'Cash':
+            val = '现金'
         print(val)
         a = array(star, stop, val)
         if os.path.exists(a.print_path()):
             pass
         else:
             raise
-    except FileNotFoundError:
-        print('消费/现金文件不存在，检查文件名。')
+    except FileNotFoundError as e:
+        print('消费/现金文件不存在，检查文件名。{}'.format(e))
     except Exception as e:
         print(e)
     else:
         print('SQL Server连接成功')
         run()
         read_file(a.target)
+        dele()
         main()
         upload_ka(star, stop)
     finally:
         print('程序结束')
-    
-    
-
     

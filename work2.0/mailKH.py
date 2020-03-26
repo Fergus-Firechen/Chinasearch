@@ -114,7 +114,7 @@ def print_info(msg, indent=0):
                     content = content.decode('GB18030')
                 start = content.find(r'合同原件是否已回')
                 end = content.find(r'电话')
-                dataCleaning(getForm(content[start:end]))
+                dataCleaning(getForm(content[start:end]), content)
         else:
             logger.info('%s Attachment:%s', '  '*indent, content_type)
 
@@ -176,7 +176,7 @@ def getForm(infobox):
     return dict_1
 
 @cost_time
-def dataCleaning(dic):
+def dataCleaning(dic, content):
     '''对邮件抓取到的数据进行清洗
     '''
     df1 = pd.DataFrame(dic)
@@ -196,10 +196,13 @@ def dataCleaning(dic):
     # df1.dropna(axis=0, how='all', inplace=True)
     df1.drop(index=df1[df1['用户名'].isna()].index, inplace=True)
     # '空值 填充'
-    df1.fillna('-', inplace=True)
+    df1.fillna(pd.np.nan, inplace=True)
     # '邮件日期 补充'
     df1['日期'] = date
-    df1['flag'] = 'IO'
+    if '已通过验证' in content:
+        df1.loc[:, 'flag'] = 'IO'
+        # 更新 开户申请表 'IO'
+        update_KH_flag(df1['用户名'].tolist())
     for i in df1.columns[1:]:
         df1[i] = df1[i].apply(lambda x: str(x))
     # 默认格式
@@ -211,10 +214,17 @@ def dataCleaning(dic):
     df1 = regulatorInformation(df1, '端口')
     # '合并 求差集'
     global df
-    df = df.append(df, sort=False)
     df = df.append(df1, sort=False)
-    df.drop_duplicates('用户名', keep=False, inplace=True)
+    df.drop_duplicates('用户名', keep='first', inplace=True)
     
+def update_KH_flag(lis):
+    for i in lis:
+        sql = ''' UPDATE 开户申请表
+                SET flag='IO'
+                WHERE 用户名='{}'
+            '''.format(i)
+        with engine.begin() as connection:
+            connection.execute(sql)
 
 def normalFormat(df):
     '''格式化：日期+str
@@ -232,7 +242,10 @@ def regulatorInformation(df, col='销售'):
     if col in ['销售', '客服']:
         # 构建查询表
         df1 = pd.DataFrame(engine.execute(
-                'select a.name, b.姓名 from 姓名统一表 a inner join personInfo b on a.person_id=b.Id'
+                '''select a.name, b.姓名 
+                from 姓名统一表 a 
+                  inner join personInfo b on a.person_id=b.Id
+                '''
                 ).fetchall(), columns=['name', 'person'])
         df1 = df1.set_index('name', drop=True)
         # str.title()
@@ -274,20 +287,17 @@ def dfNull(dat=None):
        - 读入前删除标识行
     '''
     logger.info('空行构造')
-    import numpy as np
-    dff = pd.DataFrame(np.zeros((1,len(columns))), columns=columns)
-    if dat == None:
-        dff['日期'] = datetime.datetime.now()-datetime.timedelta(hours=24)
-    else:
-        dff['日期'] = dat
-    # 格式化
-    dff = normalFormat(dff)
-    return dff
-
+    sql = " EXEC todo.p_kh_insert_null '{}' "
+    with engine.begin() as conn:
+        if dat == None:
+            conn.execute(sql.format(datetime.date.today().strftime('%Y%m%d')))
+        else:
+            conn.execute(sql.format(date_0.strftime('%Y%m%d')))
+            
 def restore(dat=None):
     '''异常恢复/增加标识行'''
-    logger.info('Start:异常恢复/增加标识行')
-    dfNull(dat).to_sql('开户申请表', con=engine, if_exists='append', index=False)
+    logger.info('Start:异常恢复/增加标识行 {}'.format(dat))
+    dfNull(dat)
     logger.info('End:异常恢复/增加标识行')
 
 @cost_time
@@ -326,7 +336,7 @@ def mainKH(date_0, sec, path):
                 if date < date_0:
                     break
                 sub = decode_str(msg.get('Subject'))
-                if '开户进度' in sub:
+                if '开户' in sub or '開戶' in sub:
                     print_info(msg)
                 else:
                     logger.info('跳过，非目标文件 %s', sub)
@@ -338,10 +348,21 @@ def mainKH(date_0, sec, path):
         # 后续变更为只增加新户
         #
         global df
+        df.reset_index(inplace=True)
         df['Id'] = df.index.tolist()
         df = df.reindex(columns=col('开户申请表'))
-        df.to_sql('开户申请表', con=engine, if_exists='append', index=False)
-        restore()
+        # 剔除原有值
+        df = df.append(dff('开户申请表'), sort=False)
+        df.drop_duplicates('用户名', keep=False, inplace=True)
+        format_todb()  # 转换 届满日期 -> NaN
+        try:
+            df.to_excel(r'C:\Users\chen.huaiyu\Desktop\Output\mailKH.xlsx')
+            df.to_sql('开户申请表', con=engine, if_exists='append', index=False)
+        except Exception as e:
+            print('Failed: df.to_sql. {}'.format(e))
+            restore(date_0)
+        else:
+            restore()
     except FileExistsError as e:
         # 复位
         restore(date_0)
@@ -392,7 +413,29 @@ def connectDB():
         print('连接失败 %s' % e)
     else:
         return engine
-    
+
+def format_todb():
+    'before upload, 转换为正确的格式'
+    #'1.上载日期转换异常报错：届满日期 -> NULL'
+    try:
+        global df
+        df.loc[:, '届满日期'] = pd.np.nan
+        df['届满日期'] = df['届满日期'].astype(str)
+        df.loc[:, '届满日期'] = pd.np.nan
+        
+        # 2. Error converting data type nvarchar to float
+        lis = ['预估月消费', '服务费', '年费']
+        for i in lis:
+            df.loc[df[i].isin(['-', '无', 'N/A', 'N', '']), i] = 0
+            
+            # 3.Could not convert str to float: '1,500'
+            for n, j in enumerate(df[i]):
+            	if isinstance(j, str):
+            		df.loc[df.index[n], i] = j.replace(',', '')
+                    
+            df[i] = df[i].astype(float)
+    except Exception as e:
+        print(e)
 
 try:
     # 账号密码 配置文件地址
@@ -414,9 +457,14 @@ try:
         
         columns = col('开户申请表', del_col=1)
         #'据数据库中最近日期判定抓取日期'
-        date_0 =  engine.execute('''select 日期 from 开户申请表 order by 日期 desc'''
-                                  ).fetchone()[0]
-        print('触发日期：%s' % date_0)
+        try:
+            sql = ''' SELECT 日期 FROM 开户申请表 WHERE 用户名 = '0.0' '''
+            date_0 = engine.execute().fetchone(sql)[0]
+        except:
+            sql = '''select 日期 from 开户申请表 order by 日期 desc'''
+            date_0 =  engine.execute(sql).fetchone()[0]
+        finally:
+            print('触发日期：%s' % date_0)
         
         # 删除DB中标识项
         engine.execute("DELETE FROM 开户申请表 WHERE 用户名 = '0.0'")
