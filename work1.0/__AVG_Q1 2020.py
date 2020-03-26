@@ -177,8 +177,8 @@ def exFile():
     
 # 均值
 def avg():
-    str_avg_work = '=average(ee3:eg3)'
-    str_avg_week = '=average(ec3:ed3)'
+    str_avg_work = '=average(el3:en3)'
+    str_avg_week = '=average(ej3:ek3)'
     
     
     '''  均值 '''

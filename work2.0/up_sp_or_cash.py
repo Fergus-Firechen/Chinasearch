@@ -53,7 +53,7 @@ class array(object):
     
     def print_path(self):
         path0 = os.getcwd()
-        path = r"c:\users\chen.huaiyu\downloads"
+        path = r"H:\SZ_数据\Download"
         # 统一文件名
         os.chdir(path)
         for i in filter(lambda x: '~' in x, os.listdir()):
@@ -139,7 +139,7 @@ def upload_ka(start, stop):
         s = strToDate(arg)
         return s.strftime('%Y%m%d')
     
-    path = r"c:\users\chen.huaiyu\downloads"
+    path = r"H:\SZ_数据\Download"
     fil = '代理商用户报表_订单明细日粒度下载_%s-%s.csv' % (strf(start), strf(stop))
     if os.path.exists(os.path.join(path, fil)):
         ka = pd.read_csv(os.path.join(path, fil), encoding='GBK', engine='python')
@@ -248,9 +248,11 @@ if __name__ == '__main__':
         print('提示：SpendingOrCash')
         star = input('输入起始日期(2019-01-01):')
         stop = input('输入终止日期(2019-01-01):')
-        val = input('消费/现金？(默认消费):')
+        val = input('消费/Cash？(默认消费):')
         if val == '':
             val = '消费'
+        elif val == 'Cash':
+            val = '现金'
         print(val)
         a = array(star, stop, val)
         if os.path.exists(a.print_path()):

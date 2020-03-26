@@ -24,7 +24,7 @@ def path_date_str(n):
     '消费文件地址构造，默认昨日'
     yes_str = datetime.strftime(datetime.today() - timedelta(n), "%Y%m%d")
     print("默认昨日：{}".format(yes_str))
-    path = os.chdir(r"c:\Users\chen.huaiyu\downloads")
+    path = os.chdir(r"H:\SZ_数据\Download")
     for i in filter(lambda x: yes_str in x, os.listdir()):
         os.rename(i, i.replace('~', '_' ))
     path = os.path.join(os.getcwd(), '消费报告 %s_%s.csv' % (yes_str, yes_str))

@@ -356,6 +356,7 @@ def mainKH(date_0, sec, path):
         df.drop_duplicates('用户名', keep=False, inplace=True)
         format_todb()  # 转换 届满日期 -> NaN
         try:
+            df.to_excel(r'C:\Users\chen.huaiyu\Desktop\Output\mailKH.xlsx')
             df.to_sql('开户申请表', con=engine, if_exists='append', index=False)
         except Exception as e:
             print('Failed: df.to_sql. {}'.format(e))
