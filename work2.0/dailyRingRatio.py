@@ -32,7 +32,7 @@ def nearly5Workdays(n=7, m=0):
 # 输出文件命名
 def giveName():
     global date1
-    path = ('C:\\Users\\chen.huaiyu\\Desktop\\Output\\' + str(date1[-1].day) + 
+    path = ('H:\SZ_数据\Download\\' + str(date1[-1].day) + 
             '日环比' + str(date1[-2].day) + '日 v1.xlsx')
     return path
 
