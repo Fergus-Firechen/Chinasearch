@@ -292,33 +292,32 @@ def sendMail(subject, dat, message, fils):
     msg['Subject'] = Header(subject, 'utf-8').encode()
 
     msg.attach(MIMEText(message, 'plain', 'utf-8'))
-    for path in fils:
-        print(path)
-        
-        with open(path, 'rb') as f:
-            mime = MIMEBase('text', 'plain', filename=os.path.split(path)[-1])
-            # 加上必要的头信息
-            mime.add_header('Content-Disposition', 'attachment', filename=os.path.split(path)[-1])  # 1.内容传输编码;2.;3.文件名
-            mime.add_header('Content-ID', '<0>')
-            mime.add_header('X-Attachment-Id', '0')
-            # add 附件
-            mime.set_payload(f.read())
-            encoders.encode_base64(mime)
-            msg.attach(mime)
+    for i in range(len(fils)):
+        if os.path.isfile(fils[i]):
+            with open(fils[i], 'rb') as f:
+                mime = MIMEBase('text', 'plain', filename=os.path.split(fils[i])[-1])
+                # 加上必要的头信息
+                mime.add_header('Content-Disposition', 'attachment', filename=os.path.split(fils[i])[-1])  # 1.内容传输编码;2.;3.文件名
+                mime.add_header('Content-ID', '<0>')
+                mime.add_header('X-Attachment-Id', '0')
+                # add 附件
+                mime.set_payload(f.read())
+                encoders.encode_base64(mime)
+                msg.attach(mime)
+
     
-    server = smtplib.SMTP(login()[0], 25)
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.set_debuglevel(1)
-    server.login(login()[1], login()[2])
-    try:
-        server.sendmail(login()[1], login()[3].split(','), msg.as_string())
-    except Exception as e:
-        print('Failed send: {}'.format(e))
-    else:
-        print('Success send.')
-    server.quit()
+    with smtplib.SMTP(login()[0], 25) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.set_debuglevel(1)
+        smtp.login(login()[1], login()[2])
+        try:
+            smtp.sendmail(login()[1], login()[3].split(','), msg.as_string())
+        except Exception as e:
+            print('Failed send: {}'.format(e))
+        else:
+            print('Success send.')
 
 def getQ(dat):
     m = dat.month
@@ -579,8 +578,11 @@ TEL:(86)755 25020862-818 |Mobile：(86)13148704556
     附件为: {}，请查阅。
 如有任何疑问，可随时和我联系，谢谢。
             '''.format(subject) + note
-        fils = [p1]
-        sendMail(subject, dat, mes, fils)
+        if os.path.exists(p1):
+            fils = [p1]
+            sendMail(subject, dat, mes, fils)
+        else:
+            print("NotFoundFil: {}".format(p1))
         #
         ## 
         subject = '近两周广告主 || 代理商消费 & TOP 50广告主(' + dat + ')'
@@ -589,14 +591,17 @@ TEL:(86)755 25020862-818 |Mobile：(86)13148704556
     附件为: {}，请查阅。
 如有任何疑问，可随时和我联系，谢谢。
             '''.format(subject) + note
-        fils = [p2, p3, p4]
-        sendMail(subject, dat, mes, fils)
+        if os.path.exists(p2) and os.path.exists(p3) and os.path.exists(p4):
+            fils = [p2, p3]
+            sendMail(subject, dat, mes, fils)
+        else:
+            print("NotFoundFil: {}".format(p1))
 
 
 if __name__ == '__main__':
     try:
         st = now()
-        #main()
+        main()
     except Exception as e:
         print('Error: {}'.format(e))
     finally:
