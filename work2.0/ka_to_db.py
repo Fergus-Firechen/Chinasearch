@@ -36,7 +36,7 @@ def connectDB():
     return engine
 
 def get_path_ka():
-    PATH = r'C:\Users\chen.huaiyu\Downloads'
+    PATH = r'H:\SZ_数据\Download'
     name = r'代理商用户报表_订单明细日粒度下载_' + date_st + '-' + date_ed + '.csv'
     path = os.path.join(PATH, name)
     return path

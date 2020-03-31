@@ -292,35 +292,67 @@ def sendMail(subject, dat, message, fils):
     msg['Subject'] = Header(subject, 'utf-8').encode()
 
     msg.attach(MIMEText(message, 'plain', 'utf-8'))
-    for path in fils:
-        print(path)
-        
-        with open(path, 'rb') as f:
-            mime = MIMEBase('text', 'plain', filename=os.path.split(path)[-1])
-            # 加上必要的头信息
-            mime.add_header('Content-Disposition', 'attachment', filename=os.path.split(path)[-1])  # 1.内容传输编码;2.;3.文件名
-            mime.add_header('Content-ID', '<0>')
-            mime.add_header('X-Attachment-Id', '0')
-            # add 附件
-            mime.set_payload(f.read())
-            encoders.encode_base64(mime)
-            msg.attach(mime)
+    for i in range(len(fils)):
+        if os.path.isfile(fils[i]):
+            with open(fils[i], 'rb') as f:
+                mime = MIMEBase('text', 'plain', filename=os.path.split(fils[i])[-1])
+                # 加上必要的头信息
+                mime.add_header('Content-Disposition', 'attachment', filename=os.path.split(fils[i])[-1])  # 1.内容传输编码;2.;3.文件名
+                mime.add_header('Content-ID', '<0>')
+                mime.add_header('X-Attachment-Id', '0')
+                # add 附件
+                mime.set_payload(f.read())
+                encoders.encode_base64(mime)
+                msg.attach(mime)
+
     
-    server = smtplib.SMTP(login()[0], 25)
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.set_debuglevel(1)
-    server.login(login()[1], login()[2])
-    try:
-        server.sendmail(login()[1], login()[3].split(','), msg.as_string())
-    except Exception as e:
-        print('Failed send: {}'.format(e))
+    with smtplib.SMTP(login()[0], 25) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.set_debuglevel(1)
+        smtp.login(login()[1], login()[2])
+        try:
+            smtp.sendmail(login()[1], login()[3].split(','), msg.as_string())
+        except Exception as e:
+            print('Failed send: {}'.format(e))
+        else:
+            print('Success send.')
+
+def getQ(dat):
+    m = dat.month
+    if m in (1, 2, 3):
+        return 'Q1'
+    elif m in (4, 5, 6):
+        return 'Q2'
+    elif m in (7, 8, 9):
+        return 'Q3'
     else:
-        print('Success send.')
-    server.quit()
+        return 'Q4'
 
-
+def header(df, ex):
+    ''' 生成各表表头
+    '''
+    # 藜取日期
+    dates = df['日期'].unique()
+    dates.sort()
+    date_range = pd.date_range(dates[0], dates[-1])
+    # 年 月 日
+    y = str(date_range[-1].year) + '年'
+    m = str(date_range[-1].month) + '月'
+    d = str(date_range[-1].day) + '日'
+    s1 = y + getQ(date_range[-1]) + '至' + y + m + d
+    s2 = date_range[0].strftime('%m.%d') + '-' + date_range[6].strftime('%m.%d')
+    s3 = date_range[7].strftime('%m.%d') + '-' + date_range[-1].strftime('%m.%d')
+    # 广告主 表头
+    if '广告主' in ex.columns:
+        lis = [''] * 4 + [s1] + [s2, s3] * 3 + [''] + ['P4P消费'] * 2
+        return lis
+    # 代理 表头
+    if '客户' in ex.columns:
+        lis = [''] * 3 + [s1] + [s2, s3] * 3 + [''] + ['P4P消费'] * 2
+        return lis
+    
 def main():
     # 主程序
     print("main")
@@ -343,6 +375,8 @@ def main():
         df_basicInfo['广告主'] = df_basicInfo['广告主'].str.lower()
         df_basicInfo['广告主'] = df_basicInfo['广告主'].str.title()
         df_basicInfo['广告主'] = df_basicInfo['广告主'].str.replace(' ', '')
+        # 日期序列获取
+        
         # Output
         ## 近两周消费周环比
         # 1.近两周有消费
@@ -449,7 +483,8 @@ def main():
         ad = transform('ad', df_basicInfo, df_qtd, df_two_weeks)
         ad.index.name = '序号'
         with pd.ExcelWriter(p3, engine='xlsxwriter') as path1:
-            ad.to_excel(path1, sheet_name='近两周广告主消费', freeze_panes=(1,0))
+            ad.to_excel(path1, sheet_name='近两周广告主消费', freeze_panes=(1,0),
+                        startrow=2)
             # 格式调整
             wb = path1.book
             sht = path1.sheets['近两周广告主消费']
@@ -461,10 +496,17 @@ def main():
                    'icons': [{'criteria': '>', 'type': 'number', 'value': 0},
                              {'criteris': '<', 'type': 'number', 'value':0}]}
             sht.set_column('B:C', 25)
-            sht.set_column('D:L', 11, fmt1)
+            sht.set_column('D:D', 12, fmt1)
+            sht.set_column('E:E', 28, fmt1)
+            sht.set_column('F:L', 15, fmt1)
             sht.set_column('N:N', 19, fmt2)
             sht.set_column('M:M', 11, fmt3)
             sht.conditional_format('M2:M'+str(ad.shape[0]+1), dic)
+            # 增加表头
+            mergeFormat = wb.add_format({'border': 1, 'bold': True})
+            sht.merge_range('A1:B1', 'P4P', mergeFormat)
+            for n, i in enumerate(header(df_two_weeks, ad)):
+                sht.write(1, n, i, mergeFormat)
         #
         ## Top 50
         #
@@ -492,7 +534,8 @@ def main():
         ag = transform('ag', df_basicInfo, df_qtd, df_two_weeks)
         ag.index.name = '序号'
         with pd.ExcelWriter(p2, engine='xlsxwriter') as path2:
-            ag.to_excel(path2, sheet_name='近两周代理消费', freeze_panes=(1,0))
+            ag.to_excel(path2, sheet_name='近两周代理消费', freeze_panes=(1,0),
+                        startrow=2)
             # 格式调整
             wb = path2.book
             sht = path2.sheets['近两周代理消费']
@@ -504,10 +547,18 @@ def main():
                    'icons': [{'criteria': '>', 'type': 'number', 'value': 0},
                              {'criteria': '<', 'type': 'number', 'value': 0}]}
             sht.set_column('B:B', 35)
-            sht.set_column('C:K', 11, fmt1)
+            sht.set_column('C:D', 12, fmt1)
+            sht.set_column('E:E', 28, fmt1)
+            sht.set_column('F:K', 15, fmt1)
             sht.set_column('M:M', 19, fmt2)
             sht.set_column('L:L', 15, fmt3)
             sht.conditional_format('L2:L'+str(ag.shape[0]+1), dic)
+            # 增加表头
+            mergeFormat = wb.add_format({'border': 1, 'bold': True, 
+                                         'align': 'center'})
+            sht.merge_range('A1:B1', 'P4P', mergeFormat)
+            for n, i in enumerate(header(df_two_weeks, ag)):
+                sht.write(1, n, i, mergeFormat)
         #
         ## 发送
         #
@@ -527,8 +578,11 @@ TEL:(86)755 25020862-818 |Mobile：(86)13148704556
     附件为: {}，请查阅。
 如有任何疑问，可随时和我联系，谢谢。
             '''.format(subject) + note
-        fils = [p1]
-        sendMail(subject, dat, mes, fils)
+        if os.path.exists(p1):
+            fils = [p1]
+            sendMail(subject, dat, mes, fils)
+        else:
+            print("NotFoundFil: {}".format(p1))
         #
         ## 
         subject = '近两周广告主 || 代理商消费 & TOP 50广告主(' + dat + ')'
@@ -537,8 +591,11 @@ TEL:(86)755 25020862-818 |Mobile：(86)13148704556
     附件为: {}，请查阅。
 如有任何疑问，可随时和我联系，谢谢。
             '''.format(subject) + note
-        fils = [p2, p3, p4]
-        sendMail(subject, dat, mes, fils)
+        if os.path.exists(p2) and os.path.exists(p3) and os.path.exists(p4):
+            fils = [p2, p3]
+            sendMail(subject, dat, mes, fils)
+        else:
+            print("NotFoundFil: {}".format(p1))
 
 
 if __name__ == '__main__':

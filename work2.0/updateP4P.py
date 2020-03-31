@@ -191,8 +191,8 @@ class Excel(object):
                 date2 = date - timedelta(1)
             # 赋值
             sht[2, 2].value = '环比增长额\n%s日环比%s日' % (date1.day, date2.day)
-            cnt1 = sht['A3:AJ3'].value.index(date1)
-            cnt2 = sht['A3:AJ3'].value.index(date2)
+            cnt1 = sht['A3:AL3'].value.index(date1)
+            cnt2 = sht['A3:AL3'].value.index(date2)
             for i in range(3, 19):
                 sht[i, 2].value = sht[i, cnt1].value - sht[i, cnt2].value  # 环比增长额
                 if sht[i, cnt2].value == 0:
