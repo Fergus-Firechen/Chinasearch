@@ -265,11 +265,11 @@ def getPath(df):
 
 def sendMail(subject, dat, message, fils):
     import smtplib
-    from email import encoders
     from email.header import Header
     from email.mime.text import MIMEText
     from email.utils import parseaddr, formataddr
-    from email.mime.multipart import MIMEMultipart, MIMEBase
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.application import MIMEApplication
     
     def _format_addr(s):
         name, addr = parseaddr(s)
@@ -295,16 +295,9 @@ def sendMail(subject, dat, message, fils):
     for i in range(len(fils)):
         if os.path.isfile(fils[i]):
             with open(fils[i], 'rb') as f:
-                mime = MIMEBase('text', 'plain', filename=os.path.split(fils[i])[-1])
-                # 加上必要的头信息
-                mime.add_header('Content-Disposition', 'attachment', filename=os.path.split(fils[i])[-1])  # 1.内容传输编码;2.;3.文件名
-                mime.add_header('Content-ID', '<0>')
-                mime.add_header('X-Attachment-Id', '0')
-                # add 附件
-                mime.set_payload(f.read())
-                encoders.encode_base64(mime)
-                msg.attach(mime)
-
+            	xl = MIMEApplication(f.read())
+            	xl.add_header('Content-Disposition', 'attachment', filename=os.path.split(fils[i])[-1])
+            	msg.attach(xl)
     
     with smtplib.SMTP(login()[0], 25) as smtp:
         smtp.ehlo()
@@ -592,7 +585,7 @@ TEL:(86)755 25020862-818 |Mobile：(86)13148704556
 如有任何疑问，可随时和我联系，谢谢。
             '''.format(subject) + note
         if os.path.exists(p2) and os.path.exists(p3) and os.path.exists(p4):
-            fils = [p2, p3]
+            fils = [p2, p3, p4]
             sendMail(subject, dat, mes, fils)
         else:
             print("NotFoundFil: {}".format(p1))
