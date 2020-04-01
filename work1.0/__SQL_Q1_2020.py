@@ -16,9 +16,9 @@ import xlwings as xw
 now = lambda : time.perf_counter()
 
 st = now()
-for i in ['v0.6', 'v0.8', 'v1']:
-    date_file = '20200318 v1'.replace('v1', i)
-    DATE = '20200325 v1'.replace('v1', i)  # 改1
+for i in ['v1']:
+    date_file = '20200325 v1'.replace('v1', i)
+    DATE = '20200331 v1'.replace('v1', i)  # 改1
 
     # eg.规范命命：ave.workday&weekdayq4(2018 oct_dec)2019.01.02_v3
     # wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ4(2018 Oct_Dec) ' + DATE_ + 'v1.xlsx')
