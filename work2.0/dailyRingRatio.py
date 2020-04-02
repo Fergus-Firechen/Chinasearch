@@ -238,7 +238,7 @@ def ringSummary():
         elif i in ['鲁东栋', '陈宛欣']:
             list_1.append('深圳区')
             list_2.append('刘婷')
-        elif i in ['Olivia', 'Ada', 'Tina']:
+        elif i in ['Olivia', 'Cindy', 'Tina']:
             list_1.append('香港区')
             list_2.append('Kendi组')
         elif i in ['Jacqueline',  'Estelle', 'Jessie']:
