@@ -30,7 +30,7 @@ def log(text):
     return decorator
 
 def get_path(val, st, ed):
-    path = r'c:\users\chen.huaiyu\downloads'
+    path = r'H:\SZ_数据\Download'
     if val == '现金':
         name = 'cash ' + st + '_' + ed + '.csv'
     else:
@@ -41,9 +41,9 @@ def get_path(val, st, ed):
         raise NameError('NotFoundFil:{}'.format(name))
 
 def read_fil(val, st, ed):
-    return pd.read_csv(get_path(val, st, ed), encoding='GBK')
+    return pd.read_csv(get_path(val, st, ed), encoding='GBK', engine='python')
 
-def handling(fil, st, ed):
+def handling(fil, st, ed, val):
     def get_date():
         return map(lambda x: x.strftime('%Y%m%d'), pd.date_range(st, ed))
     
@@ -52,7 +52,7 @@ def handling(fil, st, ed):
     df = pd.DataFrame(columns=cols)
     fil.rename(columns={'账户名称': '用户名'}, inplace=True)
     for dat in get_date():
-        col = lambda x: '无线搜索点击消费' + dat
+        col = lambda x: '无线搜索点击' + val + x
         dic2 = {col(dat): '金额'}
         df1 = fil.loc[fil[col(dat)] > 0, ['用户名', col(dat)]]
         df1.rename(columns=dic2, inplace=True)
@@ -112,14 +112,14 @@ def main():
         ed = input('结束日期(格式:20190101)?')
         if val and st and ed:
             try:
-                df = handling(read_fil(val, st, ed), st, ed)
+                df = handling(read_fil(val, st, ed), st, ed, val)
             except Exception as e:
                 print(e)
             else:
                 engine = connect_db()
                 with engine.begin() as conn:
                     conn.execute(del_mob(val, st, ed))
-                df.to_sql('消费', con=engine, if_exists='append', index=False)
+                df.to_sql(val, con=engine, if_exists='append', index=False)
             finally:
                 print('Runtime {}s'.format(round(now() - star, 3)))
                 break
@@ -129,3 +129,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    pass

@@ -86,9 +86,9 @@ class Sqlserver(object):
                     select a.*, b.金额
                     from [Account Management].[dbo].basicInfo a
                     left join 
-                    (select * from [Account Management].[dbo].现金
-                    where 类别=%s and 日期=%s ) b
-                    on a.用户名 = b.用户名
+                        (select * from [Account Management].[dbo].现金
+                        where 类别=%s and 日期=%s ) b
+                      on a.用户名 = b.用户名
                     order by Id
                     '''
             else:
@@ -96,16 +96,16 @@ class Sqlserver(object):
                     select a.*, b.金额
                     from [Account Management].[dbo].basicInfo AS a
                     left join 
-                    (select * from [Account Management].[dbo].消费
-                    where 类别=%s and 日期=%s ) AS b
-                    on a.用户名 = b.用户名
+                        (select * from [Account Management].[dbo].消费
+                        where 类别=%s and 日期=%s ) AS b
+                      on a.用户名 = b.用户名
                     order by Id
                     '''
             data = engine.execute(sql, (category, date)).fetchall()
             print(len(data))
             # 返回DataFrame
             df = pd.DataFrame(data, columns=col)
-            
+            df.fillna(0, inplace=True)
             return df
     
     
@@ -223,9 +223,8 @@ def main(dateStr):
         shtList = [shtList[-1]]
         lis = [lis[-1]]
     else:
-        print('all_mob需输入:all(全部) or mob(无线)')
-        lis = []
-        shtList = []
+        print('all_mob需输入:all(全部) / mob(无线)')
+        raise
     for n, i in enumerate(lis):
         print(n, i)
         df = DB.querySpending(engine, i, dateStr)
@@ -234,7 +233,7 @@ def main(dateStr):
         ex.toExcel(df, sht)
     wb.app.calculate()
     # 每日消费走势
-    if periods == 1:
+    if periods == 1 and (all_mob == 'all' or all_mob == ''):
         sht = wb.sheets['每日消费走势']
         ex.dailyRatio(sht, dateStr)
         # 保存
