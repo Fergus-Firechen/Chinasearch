@@ -71,7 +71,7 @@ range40 = sht40[9:row11, column11:column12 + 1]
 # 繁  # 改 1
 path = r'C:\Users\chen.huaiyu\Downloads'
 #name = 'Ave.workday&weekdayQ1(2020 Jan to Mar)2020.03.04' + '.xlsx'
-name = ('Ave.workday&weekdayQ1(2020 Jan to Mar)2020' + '.' + yes.strftime('%m.%d') + '.xlsx')
+name = ('Ave.workday&weekdayQ2(2020 Apr to Jun)2020' + '.' + yes.strftime('%m.%d') + '.xlsb')
 wb2 = xw.Book(os.path.join(path, name))
 wb2.app.calculation = 'manual'
 
@@ -158,7 +158,7 @@ for i in [sht2, sht3, sht4]:
             i[rng].color = (146, 208, 80)
 # wb2.save()
 #wb2.app.calculate()
-wb2.save()
+#wb2.save()
 print('耗时：{:3f}'.format((time.clock() - start)/60))
 
 def exFile():
@@ -177,8 +177,8 @@ def exFile():
     
 # 均值
 def avg():
-    str_avg_work = '=average(es3:eu3)'
-    str_avg_week = '=average(eq3:er3)'
+    str_avg_work = '=average(bm3:bo3)' 
+    str_avg_week = '=average(bk3:bl3)'
     
     
     '''  均值 '''
@@ -196,7 +196,7 @@ def avg():
         
 # =============================================================================
 #     
-# avg()
-# wb2.save()
+avg()
+wb2.save()
 # =============================================================================
 print('耗时：{:3f}'.format((time.clock() - start)/60))
