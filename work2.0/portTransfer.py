@@ -48,10 +48,10 @@ def main():
 	with connect().begin() as conn:
 		if len(df1) != 0:
 			for user, master in df1.values:
-				conn.execute(sql.format(master, user))
+				conn.execute(sql1.format(master, user))
 		if len(df2) != 0:
 			for am, new_am in df2.values:
-				conn.execute(sql.format(new_am, am))
+				conn.execute(sql2.format(new_am, am))
 
 
 if __name__ == '__main__':
