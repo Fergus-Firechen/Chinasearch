@@ -6,6 +6,7 @@
 '''
 from sqlalchemy import create_engine
 from configparser import ConfigParser
+import xlwings as xw
 import pandas as pd
 import time
 import os
@@ -345,7 +346,86 @@ def header(df, ex):
     if '客户' in ex.columns:
         lis = [''] * 3 + [s1] + [s2, s3] * 3 + [''] + ['P4P消费'] * 2
         return lis
+
+def fmt(df):
+    def borders(sht, rng):
+        ' 加边框 '
+        for b in range(7, 13):
+            sht[rng].api.Borders(b).LineStyle = 1
+            
+    def frame(sht, rows, cols):
+        ' 加边框'
+        for b in range(7, 13):
+            sht[1:rows, :cols].current_region.api.Borders(b).weight = 2
     
+    def getCell(sht, row, col):
+        #
+        merge = lambda x, y: x + y
+        cell = str(sht[row, col])[str(sht[row, col]).index('!') + 2:-1].split('$')
+        #
+        from functools import reduce
+        return reduce(merge, cell)
+            
+    def sum_(sht):
+        rows = sht['A3'].current_region.rows.count
+        cols = sht['A3'].current_region.columns.count
+        #
+        from xlwings import constants
+        sht['A' + str(rows + 1)].value = '总计'
+        sht['A' + str(rows + 1)].api.Font.Bold = True
+        sht['A' + str(rows + 1)].api.HorizontalAlignment = constants.HAlign.xlHAlignCenter
+        sht['A' + str(rows + 1) + ':B' + str(rows + 1)].api.merge()
+        #
+        # 左闭右开区间，cols 不用减 1
+        header = sht[2, :cols].value
+        n = header.index('QTD')
+        for col in range(n, cols):
+            sht[rows, col].formula = '=sum(' + getCell(sht, 3, col) + ':' + getCell(sht, rows - 1, col) + ')'
+            sht[rows, col].api.Font.Bold = True
+            
+    for n, fil in enumerate(getPath(df)):
+        wb = xw.Book(fil)
+        wb.app.display_alerts = False
+        if n == 0:
+            # 周环比
+            sht = wb.sheets['Top 15']
+            borders(sht, 'B1:B3')
+            borders(sht, 'B8:I22')
+            borders(sht, 'B26:I30')
+            #
+            sht = wb.sheets['汇总']
+            borders(sht, 'B2:D6')
+            #
+            sht = wb.sheets['广告主消费环比']
+            rows = sht['A1'].current_region.rows.count
+            borders(sht, 'A2:L' + str(rows))
+            #
+            sht = wb.sheets['直客消费环比']
+            rows = sht['A1'].current_region.rows.count
+            borders(sht, 'A2:L' + str(rows))
+            #
+            sht = wb.sheets['代理商消费环比']
+            rows = sht['A2'].current_region.rows.count
+            borders(sht, 'A2:J' + str(rows))
+            #
+            sht = wb.sheets['周环比']
+            rows = sht['A1'].current_region.rows.count
+            borders(sht, 'A2:Z' + str(rows))
+        else:
+            # 近两周  ad/ag/top50
+            sht = wb.sheets[0]
+            rows = sht['A2'].current_region.rows.count
+            cols = sht['A2'].current_region.columns.count
+            if 'Top' in fil:
+                # top50 不用求和
+                frame(sht, rows, cols)
+                continue
+            sum_(sht)
+            frame(sht, rows, cols)
+        wb.app.calculate()
+        wb.save()
+        #wb.close()
+
 def main():
     # 主程序
     print("main")
@@ -368,8 +448,7 @@ def main():
         df_basicInfo['广告主'] = df_basicInfo['广告主'].str.lower()
         df_basicInfo['广告主'] = df_basicInfo['广告主'].str.title()
         df_basicInfo['广告主'] = df_basicInfo['广告主'].str.replace(' ', '')
-        # 日期序列获取
-        
+        #
         # Output
         ## 近两周消费周环比
         # 1.近两周有消费
@@ -552,6 +631,10 @@ def main():
             sht.merge_range('A1:B1', 'P4P', mergeFormat)
             for n, i in enumerate(header(df_two_weeks, ag)):
                 sht.write(1, n, i, mergeFormat)
+        #
+        # 格式调整
+        #
+        fmt(df_two_weeks)
         #
         ## 发送
         #
