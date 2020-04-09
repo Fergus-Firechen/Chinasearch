@@ -17,16 +17,33 @@ Created on Thu Aug 23 15:55:02 2018
 """
 
 import pandas as pd
-import datetime, time, os
+import datetime, time
 from win32com.client import Dispatch
 
 # 近5日工作日日期序列生成
 def nearly5Workdays(n=7, m=0):
-    date1 = datetime.datetime.today() - datetime.timedelta(m)  # 调整运行时间
-    date2 = date1 - datetime.timedelta(n)  # timedelta(i)表示时间差对象
-    date3 = []
-    [date3.append(i) for i in pd.date_range(date2, periods=n, normalize=True)
-    if i.weekday() not in [5, 6]]                    # 条件判断出错！？
+    def workdays(cnt=0):
+        date1 = datetime.datetime.today() - datetime.timedelta(m)  # 调整运行时间
+        date2 = date1 - datetime.timedelta(n + cnt)  # timedelta(i)表示时间差对象
+        date3 = []
+        [date3.append(i) for i in pd.date_range(date2, periods=n+cnt, normalize=True)
+        if i.weekday() not in [5, 6]]                    # 条件判断出错！？
+        return date3
+    # 假日，临时解决方案
+    holidayList = [datetime.datetime(2020, 4, 6), datetime.datetime(2020,5,1),
+                   datetime.datetime(2020,5,4), datetime.datetime(2020,5,5),
+                   datetime.datetime(2020,6,25), datetime.datetime(2020,6,26)]
+    print('2020Q2 节假日： %s' % holidayList)
+    # 如果近7日有假日，则往前推
+    cnt = 0
+    for i in holidayList:
+        if i in workdays(cnt):
+            cnt += 1
+    # 如近7工作日有假日，则剔除
+    date3 = workdays(cnt)
+    for dat in holidayList:
+        if dat in date3:
+            date3.remove(dat)
     return date3
 
 # 输出文件命名
