@@ -40,10 +40,14 @@ def nearly5Workdays(n=7, m=0):
         if i in workdays(cnt):
             cnt += 1
     # 如近7工作日有假日，则剔除
-    date3 = workdays(cnt)
-    for dat in holidayList:
-        if dat in date3:
-            date3.remove(dat)
+    while True:
+        date3 = workdays(cnt)
+        for dat in holidayList:
+            if dat in date3:
+                date3.remove(dat)
+        cnt += 1
+        if len(date3) == 5:
+            break
     return date3
 
 # 输出文件命名
@@ -322,7 +326,9 @@ if __name__ == '__main__':
     print('请稍等...')
 # =============================================================================
     date1 = nearly5Workdays()  # 默认值：n=7, m=0  最近7天，昨日数据为0
+    print('近5个工作日：%s' % date1)
 # =============================================================================
+   
     p4p = P4P()
     sou_suo = souSuo()
     xin_chan_pin = xinChanPin_infeeds()
