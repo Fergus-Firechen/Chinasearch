@@ -380,8 +380,14 @@ def fmt(df):
         header = sht[2, :cols].value
         n = header.index('QTD')
         for col in range(n, cols):
-            sht[rows, col].formula = '=sum(' + getCell(sht, 3, col) + ':' + getCell(sht, rows - 1, col) + ')'
-            sht[rows, col].api.Font.Bold = True
+            if col < cols - 1:
+                sht[rows, col].formula = '=sum(' + getCell(sht, 3, col) + ':' + getCell(sht, rows - 1, col) + ')'
+                sht[rows, col].api.Font.Bold = True
+            elif col == cols - 1:
+                # 数据审查：环比增长率 & 排名不应该求和
+                sht[rows, col].formula = '=' + getCell(sht, rows, col - 1) + '/' + getCell(sht, rows, col - 4)
+                sht[rows, col - 2].value = None
+                
             
     for n, fil in enumerate(getPath(df)):
         wb = xw.Book(fil)
@@ -424,7 +430,7 @@ def fmt(df):
             frame(sht, rows, cols)
         wb.app.calculate()
         wb.save()
-        #wb.close()
+        wb.close()
 
 def main():
     # 主程序
@@ -573,7 +579,7 @@ def main():
             sht.set_column('F:L', 15, fmt1)
             sht.set_column('N:N', 19, fmt2)
             sht.set_column('M:M', 11, fmt3)
-            sht.conditional_format('M2:M'+str(ad.shape[0]+1), dic)
+            sht.conditional_format('M4:M'+str(ad.shape[0]+3), dic)
             # 增加表头
             mergeFormat = wb.add_format({'border': 1, 'bold': True})
             sht.merge_range('A1:B1', 'P4P', mergeFormat)
