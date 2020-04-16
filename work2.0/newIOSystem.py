@@ -59,7 +59,7 @@ def up_p4p():
     # 获取文件 “消费报告 ...”
     # 倒序排列，获取最新的文件
     # 
-    PATH = r'C:\Users\chen.huaiyu\Downloads'
+    PATH = r'H:\SZ_数据\Download'
     lis = [i for i in os.listdir(PATH) if '消费报告 ' in i and '.csv' in i]
     if len(lis) > 0:
         lis.sort(key=lambda x: os.stat(os.path.join(PATH, x)).st_mtime, reverse=True)
