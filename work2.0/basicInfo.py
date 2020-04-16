@@ -53,8 +53,11 @@ def dff(df):
     df.loc[df['加V缴费到期日'] == '0002-11-30 00:00:00', '加V缴费到期日'] = None
     # 2.统一时间列格式,将'-'变为None
     for i in ['开户日期', '首次消费日', '收取年服务费时间', '主体资质到期日', '加V缴费到期日']:
-        df.loc[df[i] == '-', i] = None
-        df[i] = pd.to_datetime(df[i])
+        try:
+            df.loc[df[i] == '-', i] = None
+            df[i] = pd.to_datetime(df[i])
+        except ValueError as e:
+            print('%s : %s' % (i, e))
     return df
 
 def initBasicInfo(path):
@@ -331,15 +334,16 @@ def new_b(n):
             after_a_year(df_date, date, '开户日期')
             df_b.loc[df_b['用户名'].isin(df_date['用户名'].tolist()), 
                      date] = df_date[date].apply(lambda x:str(x)).values
+        # 
+        new_b = df_new['用户名'].tolist()
+        if len(new_b) > 0:
+            df_new = df_b[df_b['用户名'].isin(new_b)]
+            df_new.to_sql('basicInfo', con=engine, 
+	                      if_exists='append', index=False)
     else:
         print('无新消户')
-    # 结束,更新DB
+    # 结束,准备更新DB
     df_b = initBasicInfo2(df_b)
-    new_b = df_new['用户名'].tolist()
-    if len(new_b) > 0:
-        df_new = df_b[df_b['用户名'].isin(new_b)]
-        df_new.to_sql('basicInfo', con=engine, 
-	                      if_exists='append', index=False)
 
 @cost_time
 def update_basicInfo():
