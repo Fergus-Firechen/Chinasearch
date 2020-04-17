@@ -69,7 +69,7 @@ range40 = sht40[9:row11, column11:column12 + 1]
 
 
 # 繁  # 改 1
-path = r'C:\Users\chen.huaiyu\Downloads'
+path = r'H:\SZ_数据\Download\Ave'
 #name = 'Ave.workday&weekdayQ1(2020 Jan to Mar)2020.03.04' + '.xlsx'
 name = ('Ave.workday&weekdayQ2(2020 Apr to Jun)2020' + '.' + yes.strftime('%m.%d') + '.xlsb')
 wb2 = xw.Book(os.path.join(path, name))

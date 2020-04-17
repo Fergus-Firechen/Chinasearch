@@ -77,7 +77,7 @@ for i in ['v1']:
 
     # 数据处理（2019.01.16
     DATE_ = DATE[:4] + '.' + DATE[4:6] + '.' + DATE[6:]
-    wb2 = xw.Book(r'C:\Users\chen.huaiyu\Downloads\Ave.workday&weekdayQ1(2020 Jan to Mar)' + DATE_ + '.xlsx')  # 改4
+    wb2 = xw.Book(r'H:\SZ_数据\Download\Ave\Ave.workday&weekdayQ2(2020 Apr to Jun)' + DATE_ + '.xlsx')  # 改4
     sht2 = wb2.sheets['搜索']
     sht3 = wb2.sheets['其他新产品']
     sht4 = wb2.sheets['原生广告']

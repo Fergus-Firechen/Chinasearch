@@ -98,18 +98,18 @@ print('注1：\nSpending Forecast')
 wb = xw.Book(target+'\\'+os.listdir(target)[0])
 sql = '''
 select 端口, 
+	sum([Jan Spending Forecast]) as Jan_20,
+	sum([Feb Spending Forecast]) as Feb_20,
+	sum([Mar Spending Forecast]) as Mar_20,
 	sum([Apr Spending Forecast]) as Apr_20,
 	sum([May Spending Forecast]) as May_20,
 	sum([Jun Spending Forecast]) as Jun_20,
-	sum([Apr Spending Forecast]) as Apr_20,
-	sum([May Spending Forecast]) as May_20,
-	sum([Jun Spending Forecast]) as Jun_20,
-	sum([2020Jul]) as Jul_20,
-	sum([2020Aug]) as Aug_20,
-	sum([2020Sep]) as Sep_20,
-	sum([2020Oct]) as Oct_20,
-	sum([2020Nov]) as Nov_20,
-	sum([2020Dec]) as Dec_20
+	sum([Jul Spending Forecast]) as Jul_20,
+	sum([Aug Spending Forecast]) as Aug_20,
+	sum([Sep Spending Forecast]) as Sep_20,
+	sum([Oct Spending Forecast]) as Oct_20,
+	sum([Nov Spending Forecast]) as Nov_20,
+	sum([Dec Spending Forecast]) as Dec_20
 from P4P_20191002
 where 端口 not like '%wrong%'
 group by 端口
@@ -177,12 +177,12 @@ select 用户名,
 	sum([Apr Spending Forecast]) as Apr_20,
 	sum([May Spending Forecast]) as May_20,
 	sum([Jun Spending Forecast]) as Jun_20,
-	sum([2020Jul]) as Jul_20,
-	sum([2020Aug]) as Aug_20,
-	sum([2020Sep]) as Sep_20,
-	sum([2020Oct]) as Oct_20,
-	sum([2020Nov]) as Nov_20,
-	sum([2020Dec]) as Dec_20
+	sum([Jul Spending Forecast]) as Jul_20,
+	sum([Aug Spending Forecast]) as Aug_20,
+	sum([Sep Spending Forecast]) as Sep_20,
+	sum([Oct Spending Forecast]) as Oct_20,
+	sum([Nov Spending Forecast]) as Nov_20,
+	sum([Dec Spending Forecast]) as Dec_20
 from P4P_20191002
 where 端口 not like '%wrong%'
 group by 用户名
@@ -250,12 +250,12 @@ select 区域,
 	sum([Apr Spending Forecast]) as Apr_20,
 	sum([May Spending Forecast]) as May_20,
 	sum([Jun Spending Forecast]) as Jun_20,
-	sum([2020Jul]) as Jul_20,
-	sum([2020Aug]) as Aug_20,
-	sum([2020Sep]) as Sep_20,
-	sum([2020Oct]) as Oct_20,
-	sum([2020Nov]) as Nov_20,
-	sum([2020Dec]) as Dec_20
+	sum([Jul Spending Forecast]) as Jul_20,
+	sum([Aug Spending Forecast]) as Aug_20,
+	sum([Sep Spending Forecast]) as Sep_20,
+	sum([Oct Spending Forecast]) as Oct_20,
+	sum([Nov Spending Forecast]) as Nov_20,
+	sum([Dec Spending Forecast]) as Dec_20
 from P4P_20191002
 where 端口 not like '%wrong%' and 区域 <> '-'
 group by 区域
@@ -296,12 +296,12 @@ select AM,
 	sum([Apr Spending Forecast]) as Apr_20,
 	sum([May Spending Forecast]) as May_20,
 	sum([Jun Spending Forecast]) as Jun_20,
-	sum([2020Jul]) as Jul_20,
-	sum([2020Aug]) as Aug_20,
-	sum([2020Sep]) as Sep_20,
-	sum([2020Oct]) as Oct_20,
-	sum([2020Nov]) as Nov_20,
-	sum([2020Dec]) as Dec_20
+	sum([Jul Spending Forecast]) as Jul_20,
+	sum([Aug Spending Forecast]) as Aug_20,
+	sum([Sep Spending Forecast]) as Sep_20,
+	sum([Oct Spending Forecast]) as Oct_20,
+	sum([Nov Spending Forecast]) as Nov_20,
+	sum([Dec Spending Forecast]) as Dec_20
 from P4P_20191002
 where 端口 not like '%wrong%'
 group by AM, 端口, 用户名, 广告主
