@@ -337,6 +337,7 @@ def new_b(n):
         new_b = df_new['用户名'].tolist()
         if len(new_b) > 0:
             df_new = df_b[df_b['用户名'].isin(new_b)]
+            df_new['Id'] = df_new.index
             dff(df_new)
             df_new.to_sql('basicInfo', con=engine, 
 	                      if_exists='append', index=False)
