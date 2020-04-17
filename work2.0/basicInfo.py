@@ -192,7 +192,6 @@ def new(n):
             pass
         else:
             df_new.drop(index=df_new[df_new['用户名'] == i].index, inplace=True)
-    
     return df_new
 
 @cost_time
@@ -338,6 +337,7 @@ def new_b(n):
         new_b = df_new['用户名'].tolist()
         if len(new_b) > 0:
             df_new = df_b[df_b['用户名'].isin(new_b)]
+            dff(df_new)
             df_new.to_sql('basicInfo', con=engine, 
 	                      if_exists='append', index=False)
     else:
