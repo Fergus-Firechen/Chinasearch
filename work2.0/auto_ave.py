@@ -380,6 +380,7 @@ def toZero(wb, sht, rows2):
         return header.index(lis_wo[n])
     
     # 获取 近5个工作日
+    # 近日->...  0->...  
     lis_wo, _ = work_week_days(wb)
     # 获取 表头
     header = sht['A2:FA2'].value
