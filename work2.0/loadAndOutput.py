@@ -548,8 +548,6 @@ def main():
         #
         try:
             upLoad(readAve, shtName)
-            # 版本
-            output(input('版本：v1?'))
         except UnicodeDecodeError as e:
             print("局域网连接异常，刷新文件夹: %s" % e)
             print('Runtime %.3f min' % ((now() - st)/60))
@@ -563,13 +561,15 @@ def main():
             print(e)
             print('Runtime %.3f min' % ((now() - st)/60))
             raise
+    # 版本
+    output(input('版本：v1?'))
     
 
 if __name__ == '__main__':
     
     st = now()
     
-    output('v1')
-    #main()
+    #output('v1')
+    main()
     
     print('Runtime %.3f min' % ((now() - st)/60))
