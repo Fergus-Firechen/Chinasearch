@@ -13,6 +13,9 @@ Created on Thu Aug 23 15:55:02 2018
 # Q2: summary日P4P消费与P4P消费报告不一致？因数据源采用广告主列修正AM后的，少量数据加总到其它AM上；
 # A2：修改数据源；am与ad_index的区别是什么？AM; 主导环比summary的是什么？AM; 关键因素发生了变化！ 修正回原am中的AM；
 
+2020/5/18
+# 希腾账户转裕玲；删除希腾；
+
 @author: chen.huaiyu
 """
 
@@ -54,7 +57,7 @@ def nearly5Workdays(n=7, m=0):
 def giveName():
     global date1
     path = ('H:\SZ_数据\Download\\' + str(date1[-1].day) + 
-            '日环比' + str(date1[-2].day) + '日 v1.xlsx')
+            '日环比' + str(date1[-2].day) + '日.xlsx')
     return path
 
 # 源数源地址
@@ -253,7 +256,7 @@ def ringSummary():
     list_1 = []
     list_2 = []
     for i in rs1.loc[:, 'AM']:
-        if i in ['黄希腾', '李裕玲']:
+        if i in ['李裕玲']:
             list_1.append('深圳区')
             list_2.append('麦静施')
         elif i in ['鲁东栋', '陈宛欣']:
@@ -386,9 +389,9 @@ if __name__ == '__main__':
 #     # 注意AM变更,list中数需要修改
 # =============================================================================
     for n, item in enumerate(summary.values):
-        if n in [2, 5, 10, 14]:  # ！！
+        if n in [2, 4, 9, 13]:  # ！！
             worksheet1.write_row(n+1, 0, item, formatGroup)
-        elif n in [6, 15]:  # ！！
+        elif n in [5, 14]:  # ！！
             worksheet1.write_row(n+1, 0, item, formatArea)
         else:
             worksheet1.write_row(n+1, 0, item, formatAm)
@@ -400,9 +403,9 @@ if __name__ == '__main__':
 #     worksheet1.merge_range('A2:A5', 'SG区', center)
 # =============================================================================
     centerBg1 = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'bold': True, 'bg_color': '#7799A6'})
-    worksheet1.merge_range('A2:A8', '深圳区', centerBg1)
+    worksheet1.merge_range('A2:A7', '深圳区', centerBg1)
     centerBg2 = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'bold': True, 'bg_color': '#F2B705'})
-    worksheet1.merge_range('A9:A17', '香港区', centerBg2)
+    worksheet1.merge_range('A8:A16', '香港区', centerBg2)
 # =============================================================================
 #     # 4.隐藏SG区
 #     for n in range(list(summary['区域']).count('SG区')):
