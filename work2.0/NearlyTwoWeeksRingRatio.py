@@ -284,7 +284,7 @@ def sendMail(subject, dat, message, fils):
             smt = conf.get('mail_baidu', 'sender server')
             from_addr = conf.get('mail_baidu', 'email')
             pw = conf.get('mail_baidu', 'password')
-            to_addr = conf.get('newIOSystem', 'to_addr')
+            to_addr = conf.get('to_addr', 'newIOSys')
             return smt, from_addr, pw, to_addr
     
     msg = MIMEMultipart()
@@ -297,7 +297,8 @@ def sendMail(subject, dat, message, fils):
         if os.path.isfile(fils[i]):
             with open(fils[i], 'rb') as f:
             	xl = MIMEApplication(f.read())
-            	xl.add_header('Content-Disposition', 'attachment', filename=os.path.split(fils[i])[-1])
+            	xl.add_header('Content-Disposition', 'attachment'
+                            , filename=os.path.split(fils[i])[-1])
             	msg.attach(xl)
     
     with smtplib.SMTP(login()[0], 25) as smtp:

@@ -482,7 +482,7 @@ def output(version):
                 clear2(sht, 4, 12, 18)
                 write(sht, 3, 0, conn, sqlSalesForecast((p4p, q)))
                 write(sht, 3, 4, conn, sqlSalesForecast((np, q)))
-                write(sht, 3, 7, conn, sqlSalesForecast((inf, q)))
+                write(sht, 3, 8, conn, sqlSalesForecast((inf, q)))
                 fillFormula2(sht, 3, 12, 18)
                 #
                 wb.save()

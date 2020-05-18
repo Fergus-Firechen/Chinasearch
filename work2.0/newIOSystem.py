@@ -102,7 +102,7 @@ def send_mail():
             smt = conf.get('mail_baidu', 'sender server')
             from_addr = conf.get('mail_baidu', 'email')
             pw = conf.get('mail_baidu', 'password')
-            to_addr = conf.get('newIOSystem', 'to_addr')
+            to_addr = conf.get('to_addr', 'newIOSys')
             return smt, from_addr, pw, to_addr
     
     msg = MIMEMultipart()
