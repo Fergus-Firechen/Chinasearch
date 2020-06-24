@@ -521,10 +521,11 @@ def main():
             #
             sht2 = path.sheets['汇总']
             sht2.set_column('B:D', 15, fmt1)
+            cntCol = sht2['A1'].current_region.columns.count
             sht2.write(groupAM.shape[0]+1, 0, '合计', fmt3)
-            sht2.write(groupAM.shape[0]+1, 1, '=SUM(B2:B5)')
-            sht2.write(groupAM.shape[0]+1, 2, '=SUM(C2:C5)')
-            sht2.write(groupAM.shape[0]+1, 3, '=SUM(D2:D5)')
+            sht2.write(groupAM.shape[0]+1, 1, '=SUM(B2:B' + str(cntCol-1) + ')'
+            sht2.write(groupAM.shape[0]+1, 2, '=SUM(C2:C' + str(cntCol-1) + ')'
+            sht2.write(groupAM.shape[0]+1, 3, '=SUM(D2:D' + str(cntCol-1) + ')'
             #
             # 广告主消费环比
             #

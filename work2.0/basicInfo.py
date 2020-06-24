@@ -8,6 +8,7 @@ Created on Tue Mar 19 20:10:33 2019
 # 20190528 增首次消费日
 # Q basicInfo乱序：删除Id前修改 index=Id  -- 2019.6.14
 # Q basicInfo乱序：从sqlserver读取basicInfo后，立即按Id进行排序  -- 2019.6.17
+# 2020.5.21  属性字段修改为‘账户ID’
 @author: chen.huaiyu
 """
 import os
@@ -137,7 +138,7 @@ def read_file(n):
     for n in range(len(lis_index)):
         df_b.loc[lis_index[n], '用户名'] = lis_user[n]
     '基本信息更新'
-    lis1 = ['URL', '加V缴费到期日', '端口', '网站名称', 
+    lis1 = ['属性', 'URL', '加V缴费到期日', '端口', '网站名称', 
             '主体资质到期日', '今日账户状态', '开户日期']
     # 如无开户日期则不更新；
     if '开户日期' not in df_i.columns.tolist():
